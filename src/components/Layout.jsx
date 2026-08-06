@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { getUsuarioLogado, logout } from '../lib/auth.js'
-import Logo from '../assets/Logo-branco.png';
+import logo from "../assets/Logo-branco.png";
 import { 
   FaTachometerAlt, 
   FaBoxes, 
@@ -67,7 +67,7 @@ export default function Layout() {
       <aside className={`sidebar ${open ? 'open' : ''}`}>
         <div className="sidebar-brand">
           <div className="logo-mark">
-            <img src={Logo} alt="" />
+            <img src={logo} alt="" />
           </div>
           <h1>Patrimônio Escolar</h1>
           <span>Sistema de Gestão</span>
