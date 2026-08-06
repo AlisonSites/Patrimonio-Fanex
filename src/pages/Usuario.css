@@ -1,0 +1,260 @@
+.cad-tela {
+  min-height: 100vh;
+  background: var(--paper);
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+.cad-cabecalho {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 40px 56px;
+}
+
+.cad-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brass);
+  font-weight: 600;
+}
+
+.cad-titulo {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 34px;
+  margin: 8px 0 0;
+}
+
+.cad-conteudo {
+  max-width: 1180px;
+  margin: -28px auto 56px;
+  padding: 0 32px;
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.cad-form {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 28px;
+}
+
+.cad-form-titulo {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  margin: 0 0 20px;
+  color: var(--ink);
+}
+
+.cad-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+  margin-top: 16px;
+}
+
+.cad-label:first-of-type {
+  margin-top: 0;
+}
+
+.cad-label-hint {
+  text-transform: none;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--muted);
+}
+
+.cad-input {
+  font-family: var(--font-body);
+  font-size: 14px;
+  padding: 11px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--paper-dim);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.cad-input:focus {
+  border-color: var(--brass);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(176, 141, 87, 0.18);
+}
+
+.cad-mensagem {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  font-size: 13px;
+}
+
+.cad-mensagem--erro {
+  background: rgba(179, 67, 43, 0.1);
+  border: 1px solid rgba(179, 67, 43, 0.3);
+  color: var(--danger);
+}
+
+.cad-mensagem--sucesso {
+  background: rgba(63, 107, 79, 0.1);
+  border: 1px solid rgba(63, 107, 79, 0.3);
+  color: var(--success);
+}
+
+.cad-form-acoes {
+  margin-top: 24px;
+  display: flex;
+  gap: 10px;
+}
+
+.cad-botao {
+  flex: 1;
+  padding: 12px 14px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--brass-dark);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.cad-botao:hover:not(:disabled) {
+  background: var(--brass);
+}
+
+.cad-botao:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.cad-botao--ghost {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--border);
+}
+
+.cad-botao--ghost:hover {
+  background: var(--paper-dim);
+}
+
+.cad-lista-wrap {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.cad-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.cad-tabela thead th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--paper-dim);
+}
+
+.cad-tabela tbody td {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.cad-tabela tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.cad-id {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.cad-selo {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cad-selo--ativo {
+  background: rgba(63, 107, 79, 0.12);
+  color: var(--success);
+}
+
+.cad-selo--inativo {
+  background: rgba(179, 67, 43, 0.12);
+  color: var(--danger);
+}
+
+.cad-acoes {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cad-link {
+  background: none;
+  border: none;
+  color: var(--brass-dark);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.cad-link:hover {
+  text-decoration: underline;
+}
+
+.cad-link--perigo {
+  color: var(--danger);
+}
+
+.cad-vazio {
+  text-align: center;
+  color: var(--muted);
+  padding: 32px 20px;
+}
+
+@media (max-width: 900px) {
+  .cad-conteudo {
+    grid-template-columns: 1fr;
+  }
+
+  .cad-form {
+    position: static;
+  }
+
+  .cad-cabecalho {
+    padding: 32px 24px;
+  }
+
+  .cad-conteudo {
+    padding: 0 20px;
+  }
+}
