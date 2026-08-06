@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { getUsuarioLogado, logout } from '../lib/auth.js'
-import logo from "../assets/Logo-branco.png";
+import logo from "../assets/logo-branco.png";
 import { 
   FaTachometerAlt, 
   FaBoxes, 
