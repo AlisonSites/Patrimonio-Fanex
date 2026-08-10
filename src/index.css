@@ -759,3 +759,200 @@ table.data-table {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Modal: ícones extras no header (ex: imprimir/editar na ficha) ---------- */
+.modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---------- Upload de foto do patrimônio ---------- */
+.photo-upload {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.photo-upload-preview {
+  width: 84px;
+  height: 84px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px dashed var(--cinza-borda);
+  background: var(--cinza-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-upload-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--cinza-texto);
+  font-size: 10.5px;
+  text-align: center;
+  padding: 4px;
+}
+
+/* ---------- Ficha do Patrimônio ---------- */
+.ficha-top {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.ficha-photo {
+  width: 110px;
+  height: 110px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--cinza-bg);
+  border: 1px solid var(--cinza-borda);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ficha-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ficha-photo-placeholder {
+  color: var(--cinza-texto);
+}
+
+.ficha-top-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ficha-id {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--laranja);
+  letter-spacing: 0.03em;
+}
+
+.ficha-nome {
+  font-size: 20px;
+}
+
+.ficha-modelo {
+  font-size: 13.5px;
+  color: var(--cinza-texto);
+  margin-bottom: 4px;
+}
+
+.ficha-section {
+  margin-bottom: 22px;
+}
+
+.ficha-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--azul);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--cinza-borda);
+}
+
+.ficha-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 20px;
+}
+
+.ficha-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ficha-item-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--cinza-texto);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.ficha-item-value {
+  font-size: 14px;
+  color: var(--cinza-texto-forte);
+}
+
+.ficha-observacao {
+  font-size: 13.5px;
+  color: var(--cinza-texto-forte);
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.ficha-anexo-btn {
+  margin-top: 12px;
+}
+
+.ficha-table {
+  font-size: 13px;
+}
+
+.ficha-table th,
+.ficha-table td {
+  padding: 8px 10px;
+}
+
+.ficha-historico-vazio {
+  font-size: 13px;
+  color: var(--cinza-texto);
+  padding: 10px 0;
+}
+
+@media (max-width: 900px) {
+  .ficha-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Impressão da ficha do patrimônio ---------- */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+
+  .print-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

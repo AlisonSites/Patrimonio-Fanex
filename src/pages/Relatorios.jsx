@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient.js'
 import { formatCurrency, formatDate, patrimonioCodigo, exportToCSV } from '../lib/utils.js'
 import { exportToPDF } from '../lib/exportPdf.js'
+import { FaFileCsv, FaFilePdf, FaInbox } from 'react-icons/fa'
 
 const TIPOS_RELATORIO = [
   { key: 'geral', label: 'Geral (todos os bens)' },
@@ -234,8 +235,8 @@ export default function Relatorios() {
             <div className="topbar-sub">{filtrados.length} registro(s) · Total: {formatCurrency(totalGeral)}</div>
           </div>
           <div className="toolbar">
-            <button className="btn btn-secondary" onClick={handleExportCSV}>⇩ Exportar CSV</button>
-            <button className="btn btn-primary" onClick={handleExportPDF}>⇩ Exportar PDF</button>
+            <button className="btn btn-secondary" onClick={handleExportCSV}><FaFileCsv /> Exportar CSV</button>
+            <button className="btn btn-primary" onClick={handleExportPDF}><FaFilePdf /> Exportar PDF</button>
           </div>
         </div>
 
@@ -243,7 +244,7 @@ export default function Relatorios() {
           {loading ? (
             <div className="loading-state">Carregando...</div>
           ) : linhasAtuais.length === 0 ? (
-            <div className="empty-state"><div className="icon">□</div>Nenhum dado para os filtros selecionados.</div>
+            <div className="empty-state"><div className="icon"><FaInbox /></div>Nenhum dado para os filtros selecionados.</div>
           ) : (
             <table className="data-table">
               <thead>

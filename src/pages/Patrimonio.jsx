@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
-import { supabase, NOTAS_FISCAIS_BUCKET } from '../lib/supabaseClient.js'
+import { supabase, NOTAS_FISCAIS_BUCKET, FOTOS_PATRIMONIO_BUCKET } from '../lib/supabaseClient.js'
 import { patrimonioCodigo, formatCurrency, formatDate, todayISO } from '../lib/utils.js'
 import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
+import FichaPatrimonio from '../components/FichaPatrimonio.jsx'
+import { FaEdit, FaTrash, FaPaperclip, FaInbox, FaIdCard, FaCamera } from 'react-icons/fa'
 
 const EMPTY_FORM = {
   modelo: '',
@@ -11,6 +13,7 @@ const EMPTY_FORM = {
   numero_serie: '',
   nota_fiscal_numero: '',
   nota_fiscal_arquivo: '',
+  foto: '',
   data_aquisicao: todayISO(),
   valor_original: '',
   valor_compra: '',
@@ -43,8 +46,18 @@ export default function Patrimonio() {
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [novoArquivo, setNovoArquivo] = useState(null)
+  const [novaFoto, setNovaFoto] = useState(null)
+  const [novaFotoPreview, setNovaFotoPreview] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(null)
+
+  // Ficha (modal com todas as informações do patrimônio)
+  const [ficha, setFicha] = useState(null)
+  const [fichaFotoUrl, setFichaFotoUrl] = useState(null)
+  const [fichaNotaUrl, setFichaNotaUrl] = useState(null)
+  const [fichaConservacoes, setFichaConservacoes] = useState([])
+  const [fichaMovimentacoes, setFichaMovimentacoes] = useState([])
+  const [fichaHistoricoLoading, setFichaHistoricoLoading] = useState(false)
 
   async function loadAuxData() {
     const [t, u, s, r, f] = await Promise.all([
@@ -78,6 +91,8 @@ export default function Patrimonio() {
   function openNew() {
     setForm(EMPTY_FORM)
     setNovoArquivo(null)
+    setNovaFoto(null)
+    setNovaFotoPreview('')
     setEditing(null)
     setModalOpen(true)
   }
@@ -89,6 +104,7 @@ export default function Patrimonio() {
       numero_serie: row.numero_serie || '',
       nota_fiscal_numero: row.nota_fiscal_numero || '',
       nota_fiscal_arquivo: row.nota_fiscal_arquivo || '',
+      foto: row.foto || '',
       data_aquisicao: row.data_aquisicao || '',
       valor_original: row.valor_original ?? '',
       valor_compra: row.valor_compra ?? '',
@@ -102,8 +118,17 @@ export default function Patrimonio() {
       status: row.status || 'ativo',
     })
     setNovoArquivo(null)
+    setNovaFoto(null)
+    setNovaFotoPreview('')
     setEditing(row)
     setModalOpen(true)
+    setFicha(null)
+  }
+
+  function handleFotoChange(file) {
+    setNovaFoto(file || null)
+    if (novaFotoPreview) URL.revokeObjectURL(novaFotoPreview)
+    setNovaFotoPreview(file ? URL.createObjectURL(file) : '')
   }
 
   // Setores filtrados pela unidade escolhida (opcional, mas ajuda a evitar erro de digitação)
@@ -118,6 +143,7 @@ export default function Patrimonio() {
     setError('')
 
     let notaFiscalPath = form.nota_fiscal_arquivo
+    let fotoPath = form.foto
 
     try {
       if (novoArquivo) {
@@ -130,12 +156,23 @@ export default function Patrimonio() {
         notaFiscalPath = path
       }
 
+      if (novaFoto) {
+        const ext = novaFoto.name.split('.').pop()
+        const path = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`
+        const { error: uploadErr } = await supabase.storage
+          .from(FOTOS_PATRIMONIO_BUCKET)
+          .upload(path, novaFoto, { upsert: false })
+        if (uploadErr) throw uploadErr
+        fotoPath = path
+      }
+
       const payload = {
         modelo: form.modelo,
         nome: form.nome,
         numero_serie: form.numero_serie,
         nota_fiscal_numero: form.nota_fiscal_numero,
         nota_fiscal_arquivo: notaFiscalPath || null,
+        foto: fotoPath || null,
         data_aquisicao: form.data_aquisicao || null,
         valor_original: form.valor_original === '' ? null : Number(form.valor_original),
         valor_compra: form.valor_compra === '' ? null : Number(form.valor_compra),
@@ -173,16 +210,53 @@ export default function Patrimonio() {
     load()
   }
 
-  async function getArquivoUrl(path) {
+  async function getArquivoUrl(bucket, path) {
     if (!path) return null
-    const { data } = await supabase.storage.from(NOTAS_FISCAIS_BUCKET).createSignedUrl(path, 60)
+    const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 60)
     return data?.signedUrl || null
   }
 
   async function handleAbrirArquivo(path) {
-    const url = await getArquivoUrl(path)
+    const url = await getArquivoUrl(NOTAS_FISCAIS_BUCKET, path)
     if (url) window.open(url, '_blank')
     else setError('Não foi possível abrir o arquivo da nota fiscal.')
+  }
+
+  async function openFicha(row) {
+    setFicha(row)
+    setFichaFotoUrl(null)
+    setFichaNotaUrl(null)
+    setFichaConservacoes([])
+    setFichaMovimentacoes([])
+    setFichaHistoricoLoading(true)
+
+    if (row.foto) {
+      getArquivoUrl(FOTOS_PATRIMONIO_BUCKET, row.foto).then(setFichaFotoUrl)
+    }
+    if (row.nota_fiscal_arquivo) {
+      getArquivoUrl(NOTAS_FISCAIS_BUCKET, row.nota_fiscal_arquivo).then(setFichaNotaUrl)
+    }
+
+    const [consRes, movRes] = await Promise.all([
+      supabase
+        .from('patrimonio_conservacoes')
+        .select('*')
+        .eq('patrimonio_id', row.id)
+        .order('data', { ascending: false }),
+      supabase
+        .from('patrimonio_movimentacoes')
+        .select('*, unidade_origem:unidade_origem_id(id,nome), setor_origem:setor_origem_id(id,nome), unidade_destino:unidade_destino_id(id,nome), setor_destino:setor_destino_id(id,nome)')
+        .eq('patrimonio_id', row.id)
+        .order('data', { ascending: false }),
+    ])
+    setFichaConservacoes(consRes.data || [])
+    setFichaMovimentacoes(movRes.data || [])
+    setFichaHistoricoLoading(false)
+  }
+
+  function handleFichaEditar(row) {
+    setFicha(null)
+    openEdit(row)
   }
 
   const filtered = useMemo(() => {
@@ -227,7 +301,7 @@ export default function Patrimonio() {
           {loading ? (
             <div className="loading-state">Carregando...</div>
           ) : filtered.length === 0 ? (
-            <div className="empty-state"><div className="icon">□</div>Nenhum patrimônio encontrado.</div>
+            <div className="empty-state"><div className="icon"><FaInbox /></div>Nenhum patrimônio encontrado.</div>
           ) : (
             <table className="data-table">
               <thead>
@@ -254,11 +328,12 @@ export default function Patrimonio() {
                     <td><StatusBadge status={row.status} /></td>
                     <td>
                       <div className="row-actions">
+                        <button className="icon-btn" title="Ver ficha" onClick={() => openFicha(row)}><FaIdCard /></button>
                         {row.nota_fiscal_arquivo && (
-                          <button className="icon-btn" title="Ver nota fiscal" onClick={() => handleAbrirArquivo(row.nota_fiscal_arquivo)}>📎</button>
+                          <button className="icon-btn" title="Ver nota fiscal" onClick={() => handleAbrirArquivo(row.nota_fiscal_arquivo)}><FaPaperclip /></button>
                         )}
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}>✎</button>
-                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}>🗑</button>
+                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
+                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>
                       </div>
                     </td>
                   </tr>
@@ -292,6 +367,22 @@ export default function Patrimonio() {
               </div>
             </div>
 
+            <div className="field full">
+              <label>Foto do Produto (opcional)</label>
+              <div className="photo-upload">
+                <div className="photo-upload-preview">
+                  {novaFotoPreview ? (
+                    <img src={novaFotoPreview} alt="Pré-visualização" />
+                  ) : form.foto && !novaFoto ? (
+                    <div className="photo-upload-placeholder"><FaCamera size={20} /><span>Foto já anexada</span></div>
+                  ) : (
+                    <div className="photo-upload-placeholder"><FaCamera size={20} /><span>Sem foto</span></div>
+                  )}
+                </div>
+                <input type="file" accept="image/*" onChange={(e) => handleFotoChange(e.target.files?.[0] || null)} />
+              </div>
+            </div>
+
             <div className="field">
               <label>Nome do Patrimônio *</label>
               <input required value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
@@ -302,25 +393,25 @@ export default function Patrimonio() {
             </div>
 
             <div className="field">
-              <label>Número de Série</label>
-              <input value={form.numero_serie} onChange={(e) => setForm({ ...form, numero_serie: e.target.value })} />
+              <label>Número de Série *</label>
+              <input required value={form.numero_serie} onChange={(e) => setForm({ ...form, numero_serie: e.target.value })} />
             </div>
             <div className="field">
-              <label>Número da Nota Fiscal</label>
-              <input value={form.nota_fiscal_numero} onChange={(e) => setForm({ ...form, nota_fiscal_numero: e.target.value })} />
+              <label>Número da Nota Fiscal *</label>
+              <input required value={form.nota_fiscal_numero} onChange={(e) => setForm({ ...form, nota_fiscal_numero: e.target.value })} />
             </div>
 
             <div className="field full">
               <label>Arquivo da Nota Fiscal (opcional)</label>
               <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => setNovoArquivo(e.target.files?.[0] || null)} />
               {form.nota_fiscal_arquivo && !novoArquivo && (
-                <span className="file-chip">📎 Arquivo já anexado — envie um novo para substituir</span>
+                <span className="file-chip"><FaPaperclip /> Arquivo já anexado — envie um novo para substituir</span>
               )}
             </div>
 
             <div className="field">
-              <label>Data de Aquisição</label>
-              <input type="date" value={form.data_aquisicao} onChange={(e) => setForm({ ...form, data_aquisicao: e.target.value })} />
+              <label>Data de Aquisição *</label>
+              <input required type="date" value={form.data_aquisicao} onChange={(e) => setForm({ ...form, data_aquisicao: e.target.value })} />
             </div>
             <div className="field">
               <label>Vencimento da Garantia</label>
@@ -367,8 +458,8 @@ export default function Patrimonio() {
             </div>
 
             <div className="field full">
-              <label>Responsável *</label>
-              <select required value={form.responsavel_id} onChange={(e) => setForm({ ...form, responsavel_id: e.target.value })}>
+              <label>Responsável </label>
+              <select  value={form.responsavel_id} onChange={(e) => setForm({ ...form, responsavel_id: e.target.value })}>
                 <option value="" disabled>Selecione o responsável</option>
                 {responsaveis.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
               </select>
@@ -388,6 +479,20 @@ export default function Patrimonio() {
             </div>
           </form>
         </Modal>
+      )}
+
+      {ficha && (
+        <FichaPatrimonio
+          patrimonio={ficha}
+          fotoUrl={fichaFotoUrl}
+          notaFiscalUrl={fichaNotaUrl}
+          conservacoes={fichaConservacoes}
+          movimentacoes={fichaMovimentacoes}
+          historicoLoading={fichaHistoricoLoading}
+          onClose={() => setFicha(null)}
+          onEdit={handleFichaEditar}
+          onAbrirNotaFiscal={handleAbrirArquivo}
+        />
       )}
 
       {deleting && (

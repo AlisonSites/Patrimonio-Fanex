@@ -4,6 +4,7 @@ import { codigoGenerico } from '../lib/utils.js'
 import Modal from './Modal.jsx'
 import ConfirmDialog from './ConfirmDialog.jsx'
 import StatusBadge from './StatusBadge.jsx'
+import { FaEdit, FaTrash, FaInbox } from 'react-icons/fa'
 
 /**
  * CRUD simples e configurável, usado nas telas de Tipo, Unidade e Fornecedor.
@@ -111,7 +112,7 @@ export default function CrudSimples({ table, entityLabel, codePrefix, fields }) 
             <div className="loading-state">Carregando...</div>
           ) : filtered.length === 0 ? (
             <div className="empty-state">
-              <div className="icon">□</div>
+              <div className="icon"><FaInbox /></div>
               Nenhum registro encontrado.
             </div>
           ) : (
@@ -132,8 +133,8 @@ export default function CrudSimples({ table, entityLabel, codePrefix, fields }) 
                     <td><StatusBadge status={row.status} /></td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}>✎</button>
-                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}>🗑</button>
+                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
+                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>
                       </div>
                     </td>
                   </tr>

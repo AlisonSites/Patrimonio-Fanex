@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient.js'
 import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
+import { FaEdit, FaTrash, FaInbox } from 'react-icons/fa'
 
 function formatarCpf(valor) {
   const digitos = (valor || '').replace(/\D/g, '').slice(0, 11)
@@ -154,7 +155,7 @@ export default function Usuario() {
           {loading ? (
             <div className="loading-state">Carregando...</div>
           ) : filtered.length === 0 ? (
-            <div className="empty-state"><div className="icon">□</div>Nenhum usuário encontrado.</div>
+            <div className="empty-state"><div className="icon"><FaInbox /></div>Nenhum usuário encontrado.</div>
           ) : (
             <table className="data-table">
               <thead>
@@ -169,8 +170,8 @@ export default function Usuario() {
                     <td><StatusBadge status={row.status} /></td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}>✎</button>
-                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}>🗑</button>
+                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
+                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>
                       </div>
                     </td>
                   </tr>

@@ -13,3 +13,6 @@ export const supabase = createClient(supabaseUrl, supabaseKey)
 
 // Nome do bucket de storage usado para anexar notas fiscais
 export const NOTAS_FISCAIS_BUCKET = 'notas-fiscais'
+
+// Nome do bucket de storage usado para a foto do patrimônio
+export const FOTOS_PATRIMONIO_BUCKET = 'fotos-patrimonio'
