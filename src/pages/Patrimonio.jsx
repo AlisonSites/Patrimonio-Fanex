@@ -58,6 +58,7 @@ export default function Patrimonio() {
   const [fichaNotaUrl, setFichaNotaUrl] = useState(null)
   const [fichaConservacoes, setFichaConservacoes] = useState([])
   const [fichaMovimentacoes, setFichaMovimentacoes] = useState([])
+  const [fichaQuebrados, setFichaQuebrados] = useState([])
   const [fichaHistoricoLoading, setFichaHistoricoLoading] = useState(false)
 
   async function loadAuxData() {
@@ -233,6 +234,7 @@ export default function Patrimonio() {
     setFichaNotaUrl(null)
     setFichaConservacoes([])
     setFichaMovimentacoes([])
+    setFichaQuebrados([])
     setFichaHistoricoLoading(true)
 
     if (row.foto) {
@@ -242,7 +244,7 @@ export default function Patrimonio() {
       getArquivoUrl(NOTAS_FISCAIS_BUCKET, row.nota_fiscal_arquivo).then(setFichaNotaUrl)
     }
 
-    const [consRes, movRes] = await Promise.all([
+    const [consRes, movRes, quebRes] = await Promise.all([
       supabase
         .from('patrimonio_conservacoes')
         .select('*')
@@ -253,9 +255,15 @@ export default function Patrimonio() {
         .select('*, unidade_origem:unidade_origem_id(id,nome), setor_origem:setor_origem_id(id,nome), unidade_destino:unidade_destino_id(id,nome), setor_destino:setor_destino_id(id,nome)')
         .eq('patrimonio_id', row.id)
         .order('data', { ascending: false }),
+      supabase
+        .from('patrimonio_quebrados')
+        .select('*')
+        .eq('patrimonio_id', row.id)
+        .order('data', { ascending: false }),
     ])
     setFichaConservacoes(consRes.data || [])
     setFichaMovimentacoes(movRes.data || [])
+    setFichaQuebrados(quebRes.data || [])
     setFichaHistoricoLoading(false)
   }
 
@@ -509,6 +517,7 @@ export default function Patrimonio() {
           notaFiscalUrl={fichaNotaUrl}
           conservacoes={fichaConservacoes}
           movimentacoes={fichaMovimentacoes}
+          quebrados={fichaQuebrados}
           historicoLoading={fichaHistoricoLoading}
           onClose={() => setFicha(null)}
           onEdit={handleFichaEditar}

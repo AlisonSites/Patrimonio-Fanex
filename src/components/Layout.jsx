@@ -15,6 +15,7 @@ import {
   FaUserShield,
   FaHeartbeat,
   FaExchangeAlt,
+  FaExclamationTriangle,
   FaBars,
   FaPowerOff
 } from 'react-icons/fa';
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: <FaTachometerAlt size={20} />, end: true },
   { to: '/patrimonio', label: 'Patrimônio', icon: <FaBoxes size={20} /> },
   { to: '/conservacao', label: 'Conservação de Bem', icon: <FaHeartbeat size={20} /> },
+  { to: '/quebrados', label: 'Patrimônios Quebrados', icon: <FaExclamationTriangle size={20} /> },
   { to: '/movimentacao', label: 'Movimentação', icon: <FaExchangeAlt size={20} /> },
   { to: '/tipos', label: 'Tipos', icon: <FaTags size={20} /> },
   { to: '/unidades', label: 'Unidades', icon: <FaBuilding size={20} /> },
@@ -38,6 +40,7 @@ const TITLES = {
   '/': ['Dashboard', 'Visão geral do patrimônio escolar'],
   '/patrimonio': ['Cadastro de Patrimônio', 'Gerencie todos os bens da instituição'],
   '/conservacao': ['Conservação de Bem', 'Histórico de valores e estado de conservação dos bens'],
+  '/quebrados': ['Patrimônios Quebrados', 'Registre a quebra de um bem — ele é inativado automaticamente'],
   '/movimentacao': ['Movimentação de Patrimônio', 'Registre trocas de unidade e setor dos bens'],
   '/tipos': ['Cadastro de Tipo', 'Categorias de patrimônio'],
   '/unidades': ['Cadastro de Unidade', 'Unidades escolares'],

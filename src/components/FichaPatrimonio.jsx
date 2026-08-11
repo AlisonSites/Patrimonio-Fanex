@@ -1,4 +1,4 @@
-import { FaPrint, FaEdit, FaPaperclip, FaImage, FaCoins, FaMapMarkerAlt, FaHistory, FaExchangeAlt } from 'react-icons/fa'
+import { FaPrint, FaEdit, FaPaperclip, FaImage, FaCoins, FaMapMarkerAlt, FaHistory, FaExchangeAlt, FaExclamationTriangle } from 'react-icons/fa'
 import Modal from './Modal.jsx'
 import StatusBadge from './StatusBadge.jsx'
 import { formatCurrency, formatDate, patrimonioCodigo } from '../lib/utils.js'
@@ -9,6 +9,7 @@ export default function FichaPatrimonio({
   notaFiscalUrl,
   conservacoes,
   movimentacoes,
+  quebrados,
   historicoLoading,
   onClose,
   onEdit,
@@ -93,6 +94,30 @@ export default function FichaPatrimonio({
             <p className="ficha-observacao">{patrimonio.observacao}</p>
           </div>
         )}
+
+        <div className="ficha-section">
+          <div className="ficha-section-title"><FaExclamationTriangle /> Histórico de Quebra</div>
+          {historicoLoading ? (
+            <div className="ficha-historico-vazio">Carregando...</div>
+          ) : quebrados.length === 0 ? (
+            <div className="ficha-historico-vazio">Nenhum registro de quebra.</div>
+          ) : (
+            <table className="data-table ficha-table">
+              <thead>
+                <tr><th>Data</th><th>Motivo</th><th>Observação</th></tr>
+              </thead>
+              <tbody>
+                {quebrados.map((q) => (
+                  <tr key={q.id}>
+                    <td>{formatDate(q.data)}</td>
+                    <td>{q.motivo || '-'}</td>
+                    <td>{q.observacao || '-'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
 
         <div className="ficha-section">
           <div className="ficha-section-title"><FaHistory /> Histórico de Conservação de Bem</div>

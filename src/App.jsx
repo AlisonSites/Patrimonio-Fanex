@@ -5,6 +5,7 @@ import RotaAdmin from './components/RotaAdmin.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Patrimonio from './pages/Patrimonio.jsx'
 import Conservacao from './pages/Conservacao.jsx'
+import Quebrado from './pages/Quebrado.jsx'
 import Movimentacao from './pages/Movimentacao.jsx'
 import Tipo from './pages/Tipo.jsx'
 import Unidade from './pages/Unidade.jsx'
@@ -33,6 +34,7 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/patrimonio" element={<Patrimonio />} />
         <Route path="/conservacao" element={<Conservacao />} />
+        <Route path="/quebrados" element={<Quebrado />} />
         <Route path="/movimentacao" element={<Movimentacao />} />
         <Route path="/tipos" element={<Tipo />} />
         <Route path="/unidades" element={<Unidade />} />

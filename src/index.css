@@ -776,6 +776,12 @@ table.data-table {
   border: 1px solid #BEEBD1;
 }
 
+.alert-info {
+  background: #EAF2FE;
+  color: #2563EB;
+  border: 1px solid #C6DBFC;
+}
+
 .tabs {
   display: flex;
   gap: 4px;
