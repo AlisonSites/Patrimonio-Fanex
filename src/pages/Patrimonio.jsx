@@ -5,6 +5,7 @@ import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import FichaPatrimonio from '../components/FichaPatrimonio.jsx'
+import FileCaptureField from '../components/FileCaptureField.jsx'
 import { FaEdit, FaTrash, FaPaperclip, FaInbox, FaIdCard, FaCamera } from 'react-icons/fa'
 
 const EMPTY_FORM = {
@@ -129,6 +130,10 @@ export default function Patrimonio() {
     setNovaFoto(file || null)
     if (novaFotoPreview) URL.revokeObjectURL(novaFotoPreview)
     setNovaFotoPreview(file ? URL.createObjectURL(file) : '')
+  }
+
+  function handleNotaFiscalChange(file) {
+    setNovoArquivo(file || null)
   }
 
   // Setores filtrados pela unidade escolhida (opcional, mas ajuda a evitar erro de digitação)
@@ -379,7 +384,12 @@ export default function Patrimonio() {
                     <div className="photo-upload-placeholder"><FaCamera size={20} /><span>Sem foto</span></div>
                   )}
                 </div>
-                <input type="file" accept="image/*" onChange={(e) => handleFotoChange(e.target.files?.[0] || null)} />
+                <FileCaptureField
+                  accept="image/*"
+                  cameraLabel="Tirar Foto"
+                  uploadLabel="Enviar da Galeria"
+                  onChange={handleFotoChange}
+                />
               </div>
             </div>
 
@@ -403,10 +413,21 @@ export default function Patrimonio() {
 
             <div className="field full">
               <label>Arquivo da Nota Fiscal (opcional)</label>
-              <input type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => setNovoArquivo(e.target.files?.[0] || null)} />
-              {form.nota_fiscal_arquivo && !novoArquivo && (
-                <span className="file-chip"><FaPaperclip /> Arquivo já anexado — envie um novo para substituir</span>
-              )}
+              <div className="file-field">
+                <FileCaptureField
+                  accept=".pdf,.png,.jpg,.jpeg"
+                  cameraAccept="image/*"
+                  cameraLabel="Tirar Foto da Nota"
+                  uploadLabel="Enviar Arquivo (PDF/Imagem)"
+                  onChange={handleNotaFiscalChange}
+                />
+                {novoArquivo && (
+                  <span className="file-chip"><FaPaperclip /> {novoArquivo.name}</span>
+                )}
+                {form.nota_fiscal_arquivo && !novoArquivo && (
+                  <span className="file-chip"><FaPaperclip /> Arquivo já anexado — envie um novo para substituir</span>
+                )}
+              </div>
             </div>
 
             <div className="field">

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient.js'
+import PasswordInput from '../components/PasswordInput.jsx'
 import './Login.css'
 
 function formatarCpf(valor) {
@@ -108,9 +109,8 @@ export default function Login() {
 
           <div className="field full">
             <label htmlFor="senha">Senha</label>
-            <input
+            <PasswordInput
               id="senha"
-              type="password"
               placeholder="••••••••"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}

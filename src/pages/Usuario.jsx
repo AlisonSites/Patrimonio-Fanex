@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient.js'
 import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
+import PasswordInput from '../components/PasswordInput.jsx'
 import { FaEdit, FaTrash, FaInbox } from 'react-icons/fa'
 
 function formatarCpf(valor) {
@@ -214,8 +215,7 @@ export default function Usuario() {
             </div>
             <div className="field">
               <label>Senha {editing && '(deixe em branco para manter)'}</label>
-              <input
-                type="password"
+              <PasswordInput
                 placeholder="••••••••"
                 value={form.senha || ''}
                 onChange={(e) => setForm({ ...form, senha: e.target.value })}

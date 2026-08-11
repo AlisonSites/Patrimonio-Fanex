@@ -72,6 +72,8 @@ export default function Layout() {
 
   return (
     <div className="app-shell">
+      {open && <div className="sidebar-backdrop" onClick={() => setOpen(false)} />}
+
       <aside className={`sidebar ${open ? 'open' : ''}`}>
         <div className="sidebar-brand">
           <div className="logo-mark">
@@ -101,16 +103,19 @@ export default function Layout() {
 
       <div className="main-area">
         <header className="topbar">
-          <div>
+          <div className="topbar-left">
             <button
-              className="btn btn-ghost btn-sm"
-              style={{ display: 'none' }}
+              className="sidebar-toggle"
               onClick={() => setOpen((v) => !v)}
+              title="Abrir menu"
+              aria-label="Abrir menu"
             >
               <FaBars />
             </button>
-            <h2>{title}</h2>
-            <div className="topbar-sub">{subtitle}</div>
+            <div className="topbar-titles">
+              <h2>{title}</h2>
+              <div className="topbar-sub">{subtitle}</div>
+            </div>
           </div>
 
           <div className="topbar-user">
@@ -120,7 +125,7 @@ export default function Layout() {
               <span className="topbar-user-perfil">{usuario?.perfil_nome || 'Sem perfil'}</span>
             </div>
             <button className="btn btn-ghost btn-sm" onClick={handleLogout} title="Sair">
-              <FaPowerOff /> Sair
+              <FaPowerOff /> <span className="btn-texto-sair">Sair</span>
             </button>
           </div>
         </header>
