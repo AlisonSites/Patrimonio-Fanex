@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient.js'
 import PasswordInput from '../components/PasswordInput.jsx'
+import Logo from '../assets/logo-branco.png'
 import './Login.css'
 
 function formatarCpf(valor) {
@@ -79,7 +80,9 @@ export default function Login() {
     <div className="login-tela">
       <div className="login-marca">
         <div className="login-marca-brand">
-          <div className="logo-mark">PE</div>
+          <div className="logo-mark">
+            <img src={Logo} alt="" id='Logo-login'/>
+          </div>
           <h1>Patrimônio Escolar</h1>
           <span>Sistema de Gestão</span>
         </div>
@@ -91,6 +94,7 @@ export default function Login() {
 
       <div className="login-cartao">
         <form className="login-form card" onSubmit={handleSubmit} noValidate>
+          <img src={Logo} alt="" id='Logo-Login-Form'/>
           <h2 className="login-form-titulo">Entrar</h2>
 
           <div className="field full">

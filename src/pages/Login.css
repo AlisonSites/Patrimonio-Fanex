@@ -17,8 +17,8 @@
 }
 
 .login-marca-brand .logo-mark {
-  width: 46px;
-  height: 46px;
+  width: 250px;
+  height: 100px;
   border-radius: 12px;
   background: var(--laranja);
   display: flex;
@@ -29,6 +29,25 @@
   color: var(--azul);
   font-size: 20px;
   margin-bottom: 16px;
+  /* border: .2px solid #ffffff; */
+  padding: 10px;
+}
+
+#Logo-login {
+  width: 250px;
+
+}
+
+#Logo-Login-Form {
+  width: 230px;
+  height: 100px;
+  padding: 10px;
+  background-color: var(--laranja);
+  border-radius: 15px;
+  margin: auto;
+  display: block;
+  object-fit: cover;
+  box-shadow: 2px 2px 5px #3333338a;
 }
 
 .login-marca-brand h1 {

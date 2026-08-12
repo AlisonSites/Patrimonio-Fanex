@@ -39,7 +39,7 @@ export default function Patrimonio() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('todos')
+  const [statusFilter, setStatusFilter] = useState('ativo')
   const [tipoFilter, setTipoFilter] = useState('todos')
   const [unidadeFilter, setUnidadeFilter] = useState('todos')
 
