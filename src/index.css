@@ -1132,11 +1132,11 @@ table.data-table {
   padding: 10px 0;
 }
 
-@media (max-width: 900px) {
+/* @media (max-width: 900px) {
   .ficha-grid {
     grid-template-columns: 1fr;
   }
-}
+} */
 
 /* ---------- Impressão da ficha do patrimônio ---------- */
 @media print {

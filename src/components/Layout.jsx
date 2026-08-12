@@ -31,7 +31,7 @@ const NAV_ITEMS = [
   { to: '/setores', label: 'Setores', icon: <FaUsers size={20} /> },
   { to: '/responsaveis', label: 'Responsáveis', icon: <FaUserCog size={20} /> },
   { to: '/fornecedores', label: 'Fornecedores', icon: <FaTruck size={20} /> },
-  { to: '/relatorios', label: 'Relatórios', icon: <FaChartBar size={20} /> },
+  { to: '/relatorios', label: 'Relatórios', icon: <FaChartBar size={20} />, adminOnly: true },
   { to: '/usuarios', label: 'Usuários', icon: <FaUser size={20} />, adminOnly: true },
   { to: '/perfis', label: 'Perfis de Acesso', icon: <FaUserShield size={20} />, adminOnly: true },
 ]
