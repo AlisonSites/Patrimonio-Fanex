@@ -94,7 +94,7 @@ export default function Login() {
 
       <div className="login-cartao">
         <form className="login-form card" onSubmit={handleSubmit} noValidate>
-          <img src={Logo} alt="" id='Logo-Login-Form'/>
+          {/* <img src={Logo} alt="" id='Logo-Login-Form'/> */}
           <h2 className="login-form-titulo">Entrar</h2>
 
           <div className="field full">

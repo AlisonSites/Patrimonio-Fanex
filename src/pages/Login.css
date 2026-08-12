@@ -102,8 +102,11 @@
     grid-template-columns: 1fr;
   }
 
+
+
   .login-marca {
     padding: 40px 32px;
+    /* display: none; */
   }
 
   .login-marca-brand h1 {
