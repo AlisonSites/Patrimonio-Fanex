@@ -36,19 +36,17 @@ export default function FichaPatrimonio({
           </button>
           {patrimonio.nota_fiscal_arquivo && (
             <button
-              className="btn btn-secondary btn-sm ficha-anexo-btn no-print"
+              className="icon-btn"
               onClick={() => onAbrirNotaFiscal(patrimonio.nota_fiscal_arquivo)}
             >
               <FaPaperclip />
             </button>
           )}
-
           {fotoUrl && (
-
             <button
-              className="btn btn-secondary btn-sm ficha-anexo-btn no-print"
+              className="icon-btn"
               onClick={() => window.open(fotoUrl, '_blank')}>
-                <FaImage/>
+              <FaImage />
             </button>
           )}
         </>
