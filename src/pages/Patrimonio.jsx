@@ -328,7 +328,7 @@ export default function Patrimonio() {
                 {filtered.map((row) => (
                   <tr key={row.id}>
                     <td>{patrimonioCodigo(row.id)}</td>
-                    <td>{row.foto}</td>
+                    <td><img src={row.foto} alt="" className='foto-tabela-patrimonio'/></td>
                     <td>{row.nome}</td>
                     <td>{row.modelo}</td>
                     <td>{row.numero_serie}</td>

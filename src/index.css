@@ -489,6 +489,12 @@ table.data-table {
   border-bottom: none;
 }
 
+.foto-tabela-patrimonio{
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
