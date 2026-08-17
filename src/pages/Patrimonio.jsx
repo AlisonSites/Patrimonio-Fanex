@@ -52,6 +52,9 @@ export default function Patrimonio() {
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(null)
 
+  // URLs assinadas das miniaturas de foto exibidas na tabela (path -> url)
+  const [thumbUrls, setThumbUrls] = useState({})
+
   // Ficha (modal com todas as informações do patrimônio)
   const [ficha, setFicha] = useState(null)
   const [fichaFotoUrl, setFichaFotoUrl] = useState(null)
@@ -89,6 +92,36 @@ export default function Patrimonio() {
   }
 
   useEffect(() => { load(); loadAuxData() }, [])
+
+  // Sempre que a lista de patrimônios mudar, gera as URLs assinadas das
+  // fotos que ainda não temos em cache, para exibir as miniaturas na tabela.
+  useEffect(() => {
+    const pathsFaltando = rows
+      .map((r) => r.foto)
+      .filter((path) => path && !thumbUrls[path])
+
+    if (pathsFaltando.length === 0) return
+
+    let cancelado = false
+    Promise.all(
+      pathsFaltando.map(async (path) => {
+        const url = await getArquivoUrl(FOTOS_PATRIMONIO_BUCKET, path, 3600)
+        return [path, url]
+      })
+    ).then((entradas) => {
+      if (cancelado) return
+      setThumbUrls((prev) => {
+        const novo = { ...prev }
+        for (const [path, url] of entradas) {
+          if (url) novo[path] = url
+        }
+        return novo
+      })
+    })
+
+    return () => { cancelado = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows])
 
   function openNew() {
     setForm(EMPTY_FORM)
@@ -216,9 +249,9 @@ export default function Patrimonio() {
     load()
   }
 
-  async function getArquivoUrl(bucket, path) {
+  async function getArquivoUrl(bucket, path, expiresInSeconds = 60) {
     if (!path) return null
-    const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 60)
+    const { data } = await supabase.storage.from(bucket).createSignedUrl(path, expiresInSeconds)
     return data?.signedUrl || null
   }
 
@@ -226,6 +259,12 @@ export default function Patrimonio() {
     const url = await getArquivoUrl(NOTAS_FISCAIS_BUCKET, path)
     if (url) window.open(url, '_blank')
     else setError('Não foi possível abrir o arquivo da nota fiscal.')
+  }
+
+  async function handleAbrirFoto(path) {
+    const url = await getArquivoUrl(FOTOS_PATRIMONIO_BUCKET, path)
+    if (url) window.open(url, '_blank')
+    else setError('Não foi possível abrir a foto do produto.')
   }
 
   async function openFicha(row) {
@@ -328,7 +367,24 @@ export default function Patrimonio() {
                 {filtered.map((row) => (
                   <tr key={row.id}>
                     <td>{patrimonioCodigo(row.id)}</td>
-                    <td><img src={row.foto} alt="" className='foto-tabela-patrimonio'/></td>
+                    <td>
+                      {row.foto ? (
+                        thumbUrls[row.foto] ? (
+                          <img
+                            src={thumbUrls[row.foto]}
+                            alt=""
+                            className="foto-tabela-patrimonio"
+                            onClick={() => handleAbrirFoto(row.foto)}
+                            style={{ cursor: 'pointer' }}
+                            title="Clique para ampliar"
+                          />
+                        ) : (
+                          <div className="foto-tabela-patrimonio foto-tabela-patrimonio-loading" />
+                        )
+                      ) : (
+                        <div className="foto-tabela-patrimonio foto-tabela-patrimonio-placeholder"><FaImage /></div>
+                      )}
+                    </td>
                     <td>{row.nome}</td>
                     <td>{row.modelo}</td>
                     <td>{row.numero_serie}</td>
@@ -346,8 +402,8 @@ export default function Patrimonio() {
                         {row.nota_fiscal_arquivo && (
                           <button className="icon-btn" title="Ver nota fiscal" onClick={() => handleAbrirArquivo(row.nota_fiscal_arquivo)}><FaPaperclip /></button>
                         )}
-                        {row.fotoUrl && (
-                          <button className="icon-btn" title="Ver nota fiscal" onClick={() => handleFotoChange(row.fotoUrl)}><FaImage /></button>
+                        {row.foto && (
+                          <button className="icon-btn" title="Ver foto do produto" onClick={() => handleAbrirFoto(row.foto)}><FaImage /></button>
                         )}
                         <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
                         <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>

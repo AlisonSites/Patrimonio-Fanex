@@ -489,12 +489,6 @@ table.data-table {
   border-bottom: none;
 }
 
-.foto-tabela-patrimonio{
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-}
-
 .badge {
   display: inline-flex;
   align-items: center;
@@ -1040,7 +1034,6 @@ table.data-table {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  cursor: pointer;
 }
 
 .ficha-photo-placeholder {
@@ -1167,4 +1160,31 @@ table.data-table {
   .no-print {
     display: none !important;
   }
+}
+
+/* ---------- Miniatura da foto na tabela de patrimônios ---------- */
+.foto-tabela-patrimonio {
+  width: 44px;
+  height: 44px;
+  border-radius: 15px;
+  object-fit: cover;
+  display: block;
+}
+
+.foto-tabela-patrimonio-loading {
+  background: #eee;
+  animation: foto-tabela-pulse 1.2s ease-in-out infinite;
+}
+
+.foto-tabela-patrimonio-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f2f2f2;
+  color: #999;
+}
+
+@keyframes foto-tabela-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
