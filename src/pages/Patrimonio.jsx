@@ -522,6 +522,7 @@ export default function Patrimonio() {
           onClose={() => setFicha(null)}
           onEdit={handleFichaEditar}
           onAbrirNotaFiscal={handleAbrirArquivo}
+          onAbrirFoto={(foto) => setArquivoAberto(foto)}
         />
       )}
 

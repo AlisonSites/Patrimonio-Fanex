@@ -14,6 +14,7 @@ export default function FichaPatrimonio({
   onClose,
   onEdit,
   onAbrirNotaFiscal,
+  onAbrirFoto,
 }) {
   if (!patrimonio) return null
 
@@ -44,7 +45,13 @@ export default function FichaPatrimonio({
         <div className="ficha-top">
           <div className="ficha-photo">
             {fotoUrl ? (
-              <img src={fotoUrl} alt={patrimonio.nome} />
+              <img
+                src={fotoUrl}
+                alt={patrimonio.nome}
+                onClick={() => onAbrirFoto(fotoUrl)}
+                className="ficha-photo-clicavel no-print"
+                title="Clique para ampliar"
+              />
             ) : (
               <div className="ficha-photo-placeholder"><FaImage size={30} /></div>
             )}
@@ -54,14 +61,6 @@ export default function FichaPatrimonio({
             <h2 className="ficha-nome">{patrimonio.nome}</h2>
             <div className="ficha-modelo">{patrimonio.modelo}</div>
             <StatusBadge status={patrimonio.status} />
-            {patrimonio.fotoUrl && (
-            <button
-              className="btn btn-secondary btn-sm ficha-anexo-btn no-print"
-              onClick={() => onAbrirNotaFiscal(patrimonio.fotoUrl)}
-            >
-              <FaPaperclip /> Ver Foto do produto
-            </button>
-          )}
           </div>
         </div>
 
