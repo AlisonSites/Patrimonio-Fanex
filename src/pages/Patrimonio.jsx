@@ -6,7 +6,7 @@ import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import FichaPatrimonio from '../components/FichaPatrimonio.jsx'
 import FileCaptureField from '../components/FileCaptureField.jsx'
-import { FaEdit, FaTrash, FaPaperclip, FaInbox, FaIdCard, FaCamera } from 'react-icons/fa'
+import { FaEdit, FaTrash, FaPaperclip, FaInbox, FaIdCard, FaCamera, FaImage } from 'react-icons/fa'
 
 const EMPTY_FORM = {
   modelo: '',
@@ -344,6 +344,9 @@ export default function Patrimonio() {
                         <button className="icon-btn" title="Ver ficha" onClick={() => openFicha(row)}><FaIdCard /></button>
                         {row.nota_fiscal_arquivo && (
                           <button className="icon-btn" title="Ver nota fiscal" onClick={() => handleAbrirArquivo(row.nota_fiscal_arquivo)}><FaPaperclip /></button>
+                        )}
+                        {row.fotoUrl && (
+                          <button className="icon-btn" title="Ver nota fiscal" onClick={() => handleFotoChange(row.fotoUrl)}><FaImage /></button>
                         )}
                         <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
                         <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>
