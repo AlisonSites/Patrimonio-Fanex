@@ -408,17 +408,17 @@ export default function Patrimonio() {
             </div>
 
             <div className="field">
-              <label>Nome do Patrimônio *</label>
-              <input required value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
+              <label>Nome do Patrimônio</label>
+              <input  value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
             </div>
             <div className="field">
-              <label>Modelo do Patrimônio *</label>
-              <input required value={form.modelo} onChange={(e) => setForm({ ...form, modelo: e.target.value })} />
+              <label>Modelo do Patrimônio</label>
+              <input  value={form.modelo} onChange={(e) => setForm({ ...form, modelo: e.target.value })} />
             </div>
 
             <div className="field">
-              <label>Número de Série *</label>
-              <input required value={form.numero_serie} onChange={(e) => setForm({ ...form, numero_serie: e.target.value })} />
+              <label>Número de Série</label>
+              <input  value={form.numero_serie} onChange={(e) => setForm({ ...form, numero_serie: e.target.value })} />
             </div>
             <div className="field">
               <label>Número da Nota Fiscal</label>
@@ -445,8 +445,8 @@ export default function Patrimonio() {
             </div>
 
             <div className="field">
-              <label>Data de Aquisição *</label>
-              <input required type="date" value={form.data_aquisicao} onChange={(e) => setForm({ ...form, data_aquisicao: e.target.value })} />
+              <label>Data de Aquisição</label>
+              <input  type="date" value={form.data_aquisicao} onChange={(e) => setForm({ ...form, data_aquisicao: e.target.value })} />
             </div>
             <div className="field">
               <label>Vencimento da Garantia</label>
@@ -463,8 +463,8 @@ export default function Patrimonio() {
             </div>
 
             <div className="field">
-              <label>Tipo *</label>
-              <select required value={form.tipo_id} onChange={(e) => setForm({ ...form, tipo_id: e.target.value })}>
+              <label>Tipo</label>
+              <select  value={form.tipo_id} onChange={(e) => setForm({ ...form, tipo_id: e.target.value })}>
                 <option value="" disabled>Selecione o tipo</option>
                 {tipos.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
               </select>
@@ -478,22 +478,22 @@ export default function Patrimonio() {
             </div>
 
             <div className="field">
-              <label>Unidade *</label>
-              <select required value={form.unidade_id} onChange={(e) => setForm({ ...form, unidade_id: e.target.value, setor_id: '' })}>
+              <label>Unidade</label>
+              <select  value={form.unidade_id} onChange={(e) => setForm({ ...form, unidade_id: e.target.value, setor_id: '' })}>
                 <option value="" disabled>Selecione a unidade</option>
                 {unidades.map((u) => <option key={u.id} value={u.id}>{u.nome}</option>)}
               </select>
             </div>
             <div className="field">
-              <label>Setor *</label>
-              <select required value={form.setor_id} onChange={(e) => setForm({ ...form, setor_id: e.target.value })}>
+              <label>Setor</label>
+              <select  value={form.setor_id} onChange={(e) => setForm({ ...form, setor_id: e.target.value })}>
                 <option value="" disabled>Selecione o setor</option>
                 {setoresDaUnidade.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
               </select>
             </div>
 
             <div className="field full">
-              <label>Responsável </label>
+              <label>Responsável</label>
               <select value={form.responsavel_id} onChange={(e) => setForm({ ...form, responsavel_id: e.target.value })}>
                 <option value="" disabled>Selecione o responsável</option>
                 {responsaveis.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}

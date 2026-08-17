@@ -1018,8 +1018,8 @@ table.data-table {
 }
 
 .ficha-photo {
-  width: 250px;
-  height: 250px;
+  width: 130px;
+  height: 130px;
   border-radius: 12px;
   overflow: hidden;
   flex-shrink: 0;
