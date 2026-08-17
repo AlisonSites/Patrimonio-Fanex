@@ -194,9 +194,9 @@ export default function Patrimonio() {
 
       let err
       if (editing) {
-        ;({ error: err } = await supabase.from('patrimonios').update(payload).eq('id', editing.id))
+        ; ({ error: err } = await supabase.from('patrimonios').update(payload).eq('id', editing.id))
       } else {
-        ;({ error: err } = await supabase.from('patrimonios').insert(payload))
+        ; ({ error: err } = await supabase.from('patrimonios').insert(payload))
       }
       if (err) throw err
 
@@ -226,6 +226,12 @@ export default function Patrimonio() {
     const url = await getArquivoUrl(NOTAS_FISCAIS_BUCKET, path)
     if (url) window.open(url, '_blank')
     else setError('Não foi possível abrir o arquivo da nota fiscal.')
+  }
+
+  async function handleAbrirFoto(path) {
+    const url = await getArquivoUrl(FOTOS_PATRIMONIO_BUCKET, path)
+    if (url) window.open(url, '_blank')
+    else setError('Não foi possível abrir a foto do produto.')
   }
 
   async function openFicha(row) {
@@ -276,7 +282,7 @@ export default function Patrimonio() {
     return rows.filter((r) => {
       const matchesSearch = search
         ? [r.nome, r.modelo, r.numero_serie, r.nota_fiscal_numero]
-            .some((v) => (v || '').toLowerCase().includes(search.toLowerCase()))
+          .some((v) => (v || '').toLowerCase().includes(search.toLowerCase()))
         : true
       const matchesStatus = statusFilter === 'todos' ? true : r.status === statusFilter
       const matchesTipo = tipoFilter === 'todos' ? true : String(r.tipo_id) === String(tipoFilter)
@@ -488,7 +494,7 @@ export default function Patrimonio() {
 
             <div className="field full">
               <label>Responsável </label>
-              <select  value={form.responsavel_id} onChange={(e) => setForm({ ...form, responsavel_id: e.target.value })}>
+              <select value={form.responsavel_id} onChange={(e) => setForm({ ...form, responsavel_id: e.target.value })}>
                 <option value="" disabled>Selecione o responsável</option>
                 {responsaveis.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
               </select>
@@ -522,7 +528,7 @@ export default function Patrimonio() {
           onClose={() => setFicha(null)}
           onEdit={handleFichaEditar}
           onAbrirNotaFiscal={handleAbrirArquivo}
-          onAbrirFoto={(foto) => setArquivoAberto(foto)}
+          onAbrirFoto={handleAbrirFoto}
         />
       )}
 
