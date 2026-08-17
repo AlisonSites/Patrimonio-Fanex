@@ -34,6 +34,23 @@ export default function FichaPatrimonio({
           <button className="icon-btn" title="Editar" onClick={() => onEdit(patrimonio)}>
             <FaEdit />
           </button>
+          {patrimonio.nota_fiscal_arquivo && (
+            <button
+              className="btn btn-secondary btn-sm ficha-anexo-btn no-print"
+              onClick={() => onAbrirNotaFiscal(patrimonio.nota_fiscal_arquivo)}
+            >
+              <FaPaperclip />
+            </button>
+          )}
+
+          {fotoUrl && (
+
+            <button
+              className="btn btn-secondary btn-sm ficha-anexo-btn no-print"
+              onClick={() => window.open(fotoUrl, '_blank')}>
+                <FaImage/>
+            </button>
+          )}
         </>
       }
       footer={
