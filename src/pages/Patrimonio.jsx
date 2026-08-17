@@ -275,7 +275,7 @@ export default function Patrimonio() {
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       const matchesSearch = search
-        ? [r.nome, r.modelo, r.numero_serie, r.nota_fiscal_numero]
+        ? [r.foto, r.nome, r.modelo, r.numero_serie, r.nota_fiscal_numero]
           .some((v) => (v || '').toLowerCase().includes(search.toLowerCase()))
         : true
       const matchesStatus = statusFilter === 'todos' ? true : r.status === statusFilter
@@ -319,7 +319,7 @@ export default function Patrimonio() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>ID</th><th>Nome</th><th>Modelo</th><th>Nº Série</th><th>Tipo</th>
+                  <th>ID</th><th>Foto</th><th>Nome</th><th>Modelo</th><th>Nº Série</th><th>Tipo</th>
                   <th>Unidade</th><th>Setor</th><th>Responsável</th><th>Valor Compra</th>
                   <th>Aquisição</th><th>Garantia até</th><th>Status</th><th>Ações</th>
                 </tr>
@@ -328,6 +328,7 @@ export default function Patrimonio() {
                 {filtered.map((row) => (
                   <tr key={row.id}>
                     <td>{patrimonioCodigo(row.id)}</td>
+                    <td>{row.foto}</td>
                     <td>{row.nome}</td>
                     <td>{row.modelo}</td>
                     <td>{row.numero_serie}</td>
