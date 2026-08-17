@@ -228,12 +228,6 @@ export default function Patrimonio() {
     else setError('Não foi possível abrir o arquivo da nota fiscal.')
   }
 
-  async function handleAbrirFoto(path) {
-    const url = await getArquivoUrl(FOTOS_PATRIMONIO_BUCKET, path)
-    if (url) window.open(url, '_blank')
-    else setError('Não foi possível abrir a foto do produto.')
-  }
-
   async function openFicha(row) {
     setFicha(row)
     setFichaFotoUrl(null)
@@ -528,7 +522,6 @@ export default function Patrimonio() {
           onClose={() => setFicha(null)}
           onEdit={handleFichaEditar}
           onAbrirNotaFiscal={handleAbrirArquivo}
-          onAbrirFoto={handleAbrirFoto}
         />
       )}
 

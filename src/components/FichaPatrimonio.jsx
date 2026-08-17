@@ -14,7 +14,6 @@ export default function FichaPatrimonio({
   onClose,
   onEdit,
   onAbrirNotaFiscal,
-  onAbrirFoto,
 }) {
   if (!patrimonio) return null
 
@@ -48,7 +47,7 @@ export default function FichaPatrimonio({
               <img
                 src={fotoUrl}
                 alt={patrimonio.nome}
-                onClick={() => onAbrirFoto(fotoUrl)}
+                onClick={() => window.open(fotoUrl, '_blank')}
                 className="ficha-photo-clicavel no-print"
                 title="Clique para ampliar"
               />
