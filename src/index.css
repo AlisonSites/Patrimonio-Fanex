@@ -1164,9 +1164,9 @@ table.data-table {
 
 /* ---------- Miniatura da foto na tabela de patrimônios ---------- */
 .foto-tabela-patrimonio {
-  width: 44px;
-  height: 44px;
-  border-radius: 15px;
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
   object-fit: cover;
   display: block;
 }
