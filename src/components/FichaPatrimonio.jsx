@@ -54,6 +54,14 @@ export default function FichaPatrimonio({
             <h2 className="ficha-nome">{patrimonio.nome}</h2>
             <div className="ficha-modelo">{patrimonio.modelo}</div>
             <StatusBadge status={patrimonio.status} />
+            {patrimonio.fotoUrl && (
+            <button
+              className="btn btn-secondary btn-sm ficha-anexo-btn no-print"
+              onClick={() => onAbrirNotaFiscal(patrimonio.fotoUrl)}
+            >
+              <FaPaperclip /> Ver Foto do produto
+            </button>
+          )}
           </div>
         </div>
 
