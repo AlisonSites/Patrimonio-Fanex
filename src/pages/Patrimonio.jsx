@@ -415,8 +415,8 @@ export default function Patrimonio() {
               <input required value={form.numero_serie} onChange={(e) => setForm({ ...form, numero_serie: e.target.value })} />
             </div>
             <div className="field">
-              <label>Número da Nota Fiscal *</label>
-              <input required value={form.nota_fiscal_numero} onChange={(e) => setForm({ ...form, nota_fiscal_numero: e.target.value })} />
+              <label>Número da Nota Fiscal</label>
+              <input value={form.nota_fiscal_numero} onChange={(e) => setForm({ ...form, nota_fiscal_numero: e.target.value })} />
             </div>
 
             <div className="field full">
