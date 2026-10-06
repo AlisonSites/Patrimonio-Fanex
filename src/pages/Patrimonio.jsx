@@ -6,6 +6,7 @@ import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import FichaPatrimonio from '../components/FichaPatrimonio.jsx'
 import FileCaptureField from '../components/FileCaptureField.jsx'
+import SearchableSelect from '../components/SearchableSelect.jsx'
 import { FaEdit, FaTrash, FaPaperclip, FaInbox, FaIdCard, FaCamera, FaImage } from 'react-icons/fa'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
@@ -346,14 +347,24 @@ export default function Patrimonio() {
         <div className="card-header">
           <div className="toolbar">
             <input className="search-input" placeholder="Buscar por nome, modelo, série..." value={search} onChange={(e) => setSearch(e.target.value)} />
-            <select className="filter-select" value={tipoFilter} onChange={(e) => setTipoFilter(e.target.value)}>
-              <option value="todos">Todos os tipos</option>
-              {tipos.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
-            </select>
-            <select className="filter-select" value={unidadeFilter} onChange={(e) => setUnidadeFilter(e.target.value)}>
-              <option value="todos">Todas as unidades</option>
-              {unidades.map((u) => <option key={u.id} value={u.id}>{u.nome}</option>)}
-            </select>
+            <SearchableSelect
+              variant="filter"
+              value={tipoFilter}
+              onChange={setTipoFilter}
+              options={[
+                { value: 'todos', label: 'Todos os tipos' },
+                ...tipos.map((t) => ({ value: t.id, label: t.nome })),
+              ]}
+            />
+            <SearchableSelect
+              variant="filter"
+              value={unidadeFilter}
+              onChange={setUnidadeFilter}
+              options={[
+                { value: 'todos', label: 'Todas as unidades' },
+                ...unidades.map((u) => ({ value: u.id, label: u.nome })),
+              ]}
+            />
             <select className="filter-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <option value="todos">Todos os status</option>
               <option value="ativo">Ativo</option>
@@ -548,40 +559,53 @@ export default function Patrimonio() {
 
             <div className="field">
               <label>Tipo</label>
-              <select  value={form.tipo_id} onChange={(e) => setForm({ ...form, tipo_id: e.target.value })}>
-                <option value="" disabled>Selecione o tipo</option>
-                {tipos.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
-              </select>
+              <SearchableSelect
+                value={form.tipo_id}
+                onChange={(v) => setForm({ ...form, tipo_id: v })}
+                placeholder="Selecione o tipo"
+                options={tipos.map((t) => ({ value: t.id, label: t.nome }))}
+              />
             </div>
             <div className="field">
               <label>Fornecedor</label>
-              <select value={form.fornecedor_id} onChange={(e) => setForm({ ...form, fornecedor_id: e.target.value })}>
-                <option value="">Selecione o fornecedor</option>
-                {fornecedores.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
-              </select>
+              <SearchableSelect
+                value={form.fornecedor_id}
+                onChange={(v) => setForm({ ...form, fornecedor_id: v })}
+                placeholder="Selecione o fornecedor"
+                options={[
+                  { value: '', label: '— Nenhum —' },
+                  ...fornecedores.map((f) => ({ value: f.id, label: f.nome })),
+                ]}
+              />
             </div>
 
             <div className="field">
               <label>Unidade</label>
-              <select  value={form.unidade_id} onChange={(e) => setForm({ ...form, unidade_id: e.target.value, setor_id: '' })}>
-                <option value="" disabled>Selecione a unidade</option>
-                {unidades.map((u) => <option key={u.id} value={u.id}>{u.nome}</option>)}
-              </select>
+              <SearchableSelect
+                value={form.unidade_id}
+                onChange={(v) => setForm({ ...form, unidade_id: v, setor_id: '' })}
+                placeholder="Selecione a unidade"
+                options={unidades.map((u) => ({ value: u.id, label: u.nome }))}
+              />
             </div>
             <div className="field">
               <label>Setor</label>
-              <select  value={form.setor_id} onChange={(e) => setForm({ ...form, setor_id: e.target.value })}>
-                <option value="" disabled>Selecione o setor</option>
-                {setoresDaUnidade.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
-              </select>
+              <SearchableSelect
+                value={form.setor_id}
+                onChange={(v) => setForm({ ...form, setor_id: v })}
+                placeholder="Selecione o setor"
+                options={setoresDaUnidade.map((s) => ({ value: s.id, label: s.nome }))}
+              />
             </div>
 
             <div className="field full">
               <label>Responsável</label>
-              <select value={form.responsavel_id} onChange={(e) => setForm({ ...form, responsavel_id: e.target.value })}>
-                <option value="" disabled>Selecione o responsável</option>
-                {responsaveis.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
-              </select>
+              <SearchableSelect
+                value={form.responsavel_id}
+                onChange={(v) => setForm({ ...form, responsavel_id: v })}
+                placeholder="Selecione o responsável"
+                options={responsaveis.map((r) => ({ value: r.id, label: r.nome }))}
+              />
             </div>
 
             <div className="field full">

@@ -4,6 +4,7 @@ import { codigoGenerico } from '../lib/utils.js'
 import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
+import SearchableSelect from '../components/SearchableSelect.jsx'
 
 export default function Setor() {
   const [rows, setRows] = useState([])
@@ -161,10 +162,13 @@ export default function Setor() {
             </div>
             <div className="field full">
               <label>Unidade *</label>
-              <select required value={form.unidade_id || ''} onChange={(e) => setForm({ ...form, unidade_id: e.target.value })}>
-                <option value="" disabled>Selecione a unidade</option>
-                {unidades.map((u) => <option key={u.id} value={u.id}>{u.nome}</option>)}
-              </select>
+              <SearchableSelect
+                required
+                value={form.unidade_id || ''}
+                onChange={(v) => setForm({ ...form, unidade_id: v })}
+                placeholder="Selecione a unidade"
+                options={unidades.map((u) => ({ value: u.id, label: u.nome }))}
+              />
             </div>
             <div className="field full">
               <label>Status</label>

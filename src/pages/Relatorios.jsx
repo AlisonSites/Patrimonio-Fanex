@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient.js'
 import { formatCurrency, formatDate, patrimonioCodigo, exportToCSV } from '../lib/utils.js'
 import { exportToPDF } from '../lib/exportPdf.js'
+import SearchableSelect from '../components/SearchableSelect.jsx'
 import { FaFileCsv, FaFilePdf, FaInbox } from 'react-icons/fa'
 
 const TIPOS_RELATORIO = [
@@ -323,26 +324,36 @@ export default function Relatorios() {
           </div>
 
           <div className="toolbar" style={{ marginBottom: 4 }}>
-            <select className="filter-select" value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)}>
-              <option value="todos">Todos os tipos</option>
-              {tipos.map((t) => <option key={t.id} value={t.id}>{t.nome}</option>)}
-            </select>
-            <select className="filter-select" value={filtroUnidade} onChange={(e) => setFiltroUnidade(e.target.value)}>
-              <option value="todos">Todas as unidades</option>
-              {unidades.map((u) => <option key={u.id} value={u.id}>{u.nome}</option>)}
-            </select>
-            <select className="filter-select" value={filtroSetor} onChange={(e) => setFiltroSetor(e.target.value)}>
-              <option value="todos">Todos os setores</option>
-              {setores.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
-            </select>
-            <select className="filter-select" value={filtroResponsavel} onChange={(e) => setFiltroResponsavel(e.target.value)}>
-              <option value="todos">Todos os responsáveis</option>
-              {responsaveis.map((r) => <option key={r.id} value={r.id}>{r.nome}</option>)}
-            </select>
-            <select className="filter-select" value={filtroFornecedor} onChange={(e) => setFiltroFornecedor(e.target.value)}>
-              <option value="todos">Todos os fornecedores</option>
-              {fornecedores.map((f) => <option key={f.id} value={f.id}>{f.nome}</option>)}
-            </select>
+            <SearchableSelect
+              variant="filter"
+              value={filtroTipo}
+              onChange={setFiltroTipo}
+              options={[{ value: 'todos', label: 'Todos os tipos' }, ...tipos.map((t) => ({ value: t.id, label: t.nome }))]}
+            />
+            <SearchableSelect
+              variant="filter"
+              value={filtroUnidade}
+              onChange={setFiltroUnidade}
+              options={[{ value: 'todos', label: 'Todas as unidades' }, ...unidades.map((u) => ({ value: u.id, label: u.nome }))]}
+            />
+            <SearchableSelect
+              variant="filter"
+              value={filtroSetor}
+              onChange={setFiltroSetor}
+              options={[{ value: 'todos', label: 'Todos os setores' }, ...setores.map((s) => ({ value: s.id, label: s.nome }))]}
+            />
+            <SearchableSelect
+              variant="filter"
+              value={filtroResponsavel}
+              onChange={setFiltroResponsavel}
+              options={[{ value: 'todos', label: 'Todos os responsáveis' }, ...responsaveis.map((r) => ({ value: r.id, label: r.nome }))]}
+            />
+            <SearchableSelect
+              variant="filter"
+              value={filtroFornecedor}
+              onChange={setFiltroFornecedor}
+              options={[{ value: 'todos', label: 'Todos os fornecedores' }, ...fornecedores.map((f) => ({ value: f.id, label: f.nome }))]}
+            />
             {relatorio !== 'quebrados' && relatorio !== 'integros' && (
               <select className="filter-select" value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}>
                 <option value="todos">Todos os status</option>

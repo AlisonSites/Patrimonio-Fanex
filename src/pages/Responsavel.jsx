@@ -4,6 +4,7 @@ import { codigoGenerico } from '../lib/utils.js'
 import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
+import SearchableSelect from '../components/SearchableSelect.jsx'
 import { FaEdit, FaTrash, FaInbox } from 'react-icons/fa'
 
 export default function Responsavel() {
@@ -168,10 +169,13 @@ export default function Responsavel() {
             </div>
             <div className="field full">
               <label>Setor *</label>
-              <select required value={form.setor_id || ''} onChange={(e) => setForm({ ...form, setor_id: e.target.value })}>
-                <option value="" disabled>Selecione o setor</option>
-                {setores.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
-              </select>
+              <SearchableSelect
+                required
+                value={form.setor_id || ''}
+                onChange={(v) => setForm({ ...form, setor_id: v })}
+                placeholder="Selecione o setor"
+                options={setores.map((s) => ({ value: s.id, label: s.nome }))}
+              />
             </div>
             <div className="field full">
               <label>Unidade (automática)</label>

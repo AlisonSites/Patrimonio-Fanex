@@ -740,6 +740,158 @@ table.data-table {
   color: var(--cinza-texto-forte);
 }
 
+/* ---------- Select com busca (SearchableSelect) ---------- */
+.ss {
+  position: relative;
+  min-width: 0;
+}
+
+.ss-filter {
+  min-width: 200px;
+  max-width: 280px;
+}
+
+.ss .ss-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--cinza-borda);
+  border-radius: 8px;
+  background: var(--branco);
+  color: var(--cinza-texto-forte);
+  text-align: left;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.ss-field .ss-trigger {
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+.ss-filter .ss-trigger {
+  padding: 9px 12px;
+  font-size: 13.5px;
+}
+
+.ss .ss-trigger:focus,
+.ss .ss-trigger.ss-open {
+  border-color: var(--laranja);
+  box-shadow: 0 0 0 3px rgba(255, 84, 0, 0.12);
+}
+
+.ss .ss-trigger:disabled {
+  background: var(--cinza-bg);
+  cursor: not-allowed;
+}
+
+.ss-value,
+.ss-placeholder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ss-placeholder {
+  color: var(--cinza-texto);
+}
+
+.ss-chevron {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--cinza-texto);
+}
+
+.ss .ss-required {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ss-panel {
+  position: fixed;
+  z-index: 1000;
+  background: var(--branco);
+  border: 1px solid var(--cinza-borda);
+  border-radius: 10px;
+  box-shadow: var(--sombra-forte);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 320px;
+}
+
+.ss-search-wrap {
+  position: relative;
+  padding: 8px;
+  border-bottom: 1px solid var(--cinza-borda);
+}
+
+.ss-search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: var(--cinza-texto);
+}
+
+.ss-panel .ss-search {
+  width: 100%;
+  padding: 8px 10px 8px 30px;
+  border: 1px solid var(--cinza-borda);
+  border-radius: 6px;
+  font-size: 13.5px;
+  outline: none;
+}
+
+.ss-panel .ss-search:focus {
+  border-color: var(--laranja);
+}
+
+.ss-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.ss-option {
+  padding: 8px 12px;
+  font-size: 13.5px;
+  cursor: pointer;
+  color: var(--cinza-texto-forte);
+}
+
+.ss-option.ss-highlight {
+  background: var(--cinza-bg);
+}
+
+.ss-option.ss-selected {
+  font-weight: 600;
+  color: var(--laranja);
+}
+
+.ss-empty,
+.ss-more {
+  padding: 10px 12px;
+  font-size: 12.5px;
+  color: var(--cinza-texto);
+}
+
+.ss-more {
+  border-top: 1px solid var(--cinza-borda);
+}
+
 .empty-state {
   text-align: center;
   padding: 60px 20px;

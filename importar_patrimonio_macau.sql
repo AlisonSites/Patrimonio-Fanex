@@ -12,11 +12,16 @@
 --   data_aquisicao  <- data de hoje
 --   status          <- 'inativo' para itens no departamento LIXEIRA, senão 'ativo'
 --   observacao      <- departamento original da relação
+--   tipo_id         <- tipo deduzido pelo início do nome (ex.: "CADEIRA ..." -> CADEIRA).
+--                      Usa os tipos já cadastrados (comparando o nome sem diferenciar
+--                      maiúsculas) e cria os que faltarem.
 --
 -- Pode rodar de novo sem duplicar: pula itens com mesmo nome + código já cadastrados.
+-- Se a importação já tiver sido feita antes, o script só preenche o tipo
+-- dos patrimônios importados que ainda estão sem tipo.
 -- =====================================================================
 
-begin;
+-- Tudo é feito em um único comando (não depende de tabela temporária).
 
 with dados (nome, codigo, unidade, departamento) as (
   values
@@ -808,42 +813,182 @@ with dados (nome, codigo, unidade, departamento) as (
   ('IPHONE 14 (MARKETING)', 'CEL/008', null, null),
   ('LG DUAL SIM PRETO', 'CEL/002', null, null)
 ),
-mapeado as (
-  select
-    d.*,
-    case d.unidade
-      when 1 then 1::bigint     -- UNIDADE 1 - FANEX MACA
-      when 2 then null::bigint  -- UNIDADE 2 - FANEX ALTO (coloque o id aqui, se existir)
-      when 3 then null::bigint  -- UNIDADE 3 - ESCOLA NOV (coloque o id aqui, se existir)
-    end as unidade_id
+
+-- ---------------------------------------------------------------------
+-- Classificação do tipo pelo início do nome (a ordem importa)
+-- ---------------------------------------------------------------------
+classificado as (
+  select d.*, case
+    -- Tipos já cadastrados
+    when nome like 'PROJETOR%'                    then 'PROJETOR'
+    when nome like 'CAIXA DE SOM%'                then 'CAIXA DE SOM'
+    when nome like 'TECLADO%'                     then 'TECLADO'
+    when nome like 'FONE%'                        then 'FONE'
+    when nome like 'CADEIRA%'                     then 'CADEIRA'
+    -- Informática / eletrônicos
+    when nome like 'MONITOR%'                     then 'MONITOR'
+    when nome like 'GABINETE%'
+      or nome like 'COMPUTADOR%'                  then 'GABINETE'
+    when nome like 'NOTEBOOK%'                    then 'NOTEBOOK'
+    when nome like 'MOUSE%'                       then 'MOUSE'
+    when nome like 'ESTABILIZADOR%'               then 'ESTABILIZADOR'
+    when nome like 'NOBREAK%'                     then 'NOBREAK'
+    when nome like 'IMPRESSORA%'                  then 'IMPRESSORA'
+    when nome like 'SWITCH%'                      then 'SWITCH'
+    when nome like 'RACK%'                        then 'RACK'
+    when nome like 'ROTEADOR%'                    then 'ROTEADOR'
+    when nome like 'WEBCAM%'                      then 'WEBCAM'
+    when nome like 'CAMERA%'                      then 'CÂMERA'
+    when nome like 'MESA DIGITALIZADORA%'         then 'MESA DIGITALIZADORA'
+    when nome like 'SUPORTE/GABINETE%'            then 'SUPORTE DE GABINETE'
+    when nome like 'CELULAR%'
+      or nome like 'GALAXY%'
+      or nome like 'IPHONE%'
+      or nome like 'LG DUAL%'                     then 'CELULAR'
+    when nome like 'TELEFONE%'                    then 'TELEFONE'
+    when nome like 'TV %'                         then 'TELEVISÃO'
+    when nome like 'MAQUINETA%'                   then 'MAQUINETA DE CARTÃO'
+    when nome like 'ETIQUET%'                     then 'ETIQUETADORA'
+    when nome like 'FRAGMENTADORA%'               then 'FRAGMENTADORA'
+    when nome like 'SOFTBOX%'                     then 'SOFTBOX'
+    when nome like 'EXTENSÃO%'                    then 'EXTENSÃO'
+    when nome like 'GERADOR%'                     then 'GERADOR'
+    -- Mobiliário
+    when nome like 'ARMARIO%'
+      or nome like 'ARMÁRIO%'                     then 'ARMÁRIO'
+    when nome like 'MESA%'                        then 'MESA'
+    when nome like 'BANCADA%'                     then 'BANCADA'
+    when nome like 'BALCÃO%'                      then 'BALCÃO'
+    when nome like 'PRATELEIRA%'                  then 'PRATELEIRA'
+    when nome like 'GAVETEIRO%'                   then 'GAVETEIRO'
+    when nome like 'LONGARINA%'                   then 'LONGARINA'
+    when nome like 'ESCADA%'                      then 'ESCADA'
+    when nome like 'QUADRO%'                      then 'QUADRO ANATÔMICO'
+    -- Climatização / eletrodomésticos
+    when nome like 'AR CONDICIONADO%'             then 'AR CONDICIONADO'
+    when nome like 'VENTILADOR%'                  then 'VENTILADOR'
+    when nome like 'BEBEDOURO%'
+      or nome like 'GELA-ÁGUA%'                   then 'BEBEDOURO'
+    when nome like 'MICROONDAS%'                  then 'MICRO-ONDAS'
+    when nome like 'CAFETEIRA%'                   then 'CAFETEIRA'
+    -- Laboratórios
+    when nome like 'MICROSCÓPIO%'                 then 'MICROSCÓPIO'
+    when nome like 'BONECO%'                      then 'BONECO DE SIMULAÇÃO'
+    when nome like 'PAINEL%'                      then 'PAINEL ELETROTÉCNICO'
+    when nome like 'NEGATOSCOPIO%'
+      or nome like 'KIT DE RADIO%'                then 'EQUIPAMENTO DE RADIOLOGIA'
+    when nome like 'CAMA HOSPITALAR%'
+      or nome like 'CARRINHO HOSPITALAR%'
+      or nome like 'SUPORTE PARA SORO%'
+      or nome like 'BIOMB%'
+      or nome like 'ALMOTOLIA%'
+      or nome like 'AMBU%'
+      or nome like 'BACIA%'
+      or nome like 'BANDEJA%'
+      or nome like 'CUBA RIM%'
+      or nome like 'LIXEIRINHA%'
+      or nome like 'MICTÓRIO%'
+      or nome like 'PORTA ALGODÃO%'
+      or nome like 'BALANÇA%'
+      or nome like 'ESTETOSCÓPIO%'
+      or nome like 'OXIMETRO%'
+      or nome like 'TERMOMETRO%'
+      or nome like 'TERMÔMETRO%'                  then 'MATERIAL HOSPITALAR'
+    when nome like 'FURADEIRA%'
+      or nome like 'LIXADEIRA%'
+      or nome like 'MAQUINA DE SOLDA%'
+      or nome like 'MOÇA%'
+      or nome like 'MOTOR%'
+      or nome like 'POLICORTE%'
+      or nome like 'TORNO%'                       then 'EQUIPAMENTO DE MECÂNICA'
+    else 'OUTROS'
+  end as tipo,
+  case d.unidade
+    when 1 then 1::bigint     -- UNIDADE 1 - FANEX MACA
+    when 2 then null::bigint  -- UNIDADE 2 - FANEX ALTO (coloque o id aqui, se existir)
+    when 3 then null::bigint  -- UNIDADE 3 - ESCOLA NOV (coloque o id aqui, se existir)
+  end as unidade_id
   from dados d
+),
+
+-- ---------------------------------------------------------------------
+-- Cria os tipos que ainda não existem
+-- ---------------------------------------------------------------------
+tipos_novos as (
+  insert into public.tipos (nome)
+  select distinct c.tipo
+  from classificado c
+  where not exists (
+    select 1 from public.tipos t where upper(trim(t.nome)) = c.tipo
+  )
+  returning id, nome
+),
+
+-- Tipos existentes + criados agora (os novos ainda não aparecem em public.tipos
+-- dentro deste mesmo comando, por isso entram por aqui)
+todos_tipos as (
+  select id, upper(trim(nome)) as nome from public.tipos
+  union all
+  select id, nome from tipos_novos
+),
+
+com_tipo as (
+  select c.*,
+    (select min(t.id) from todos_tipos t where t.nome = c.tipo) as tipo_id
+  from classificado c
+),
+
+-- ---------------------------------------------------------------------
+-- Insere os patrimônios que ainda não existem
+-- ---------------------------------------------------------------------
+inseridos as (
+  insert into public.patrimonios
+    (nome, modelo, data_aquisicao, tipo_id, unidade_id, setor_id, observacao, status)
+  select
+    m.nome,
+    m.codigo,
+    current_date,
+    m.tipo_id,
+    m.unidade_id,
+    (select s.id
+       from public.setores s
+      where upper(trim(s.nome)) = upper(m.departamento)
+        and s.unidade_id is not distinct from m.unidade_id
+      order by s.id
+      limit 1),
+    case
+      when m.departamento is not null then 'Departamento na relação Grandal: ' || m.departamento
+    end,
+    case when m.departamento = 'LIXEIRA' then 'inativo' else 'ativo' end
+  from com_tipo m
+  where not exists (
+    select 1 from public.patrimonios p
+     where p.nome = m.nome and p.modelo = m.codigo
+  )
+  returning id
+),
+
+-- ---------------------------------------------------------------------
+-- Se a importação já tinha sido feita antes: preenche o tipo dos que estão sem
+-- ---------------------------------------------------------------------
+atualizados as (
+  update public.patrimonios p
+  set tipo_id = m.tipo_id
+  from com_tipo m
+  where p.nome = m.nome
+    and p.modelo = m.codigo
+    and p.tipo_id is null
+  returning p.id
 )
-insert into public.patrimonios
-  (nome, modelo, data_aquisicao, unidade_id, setor_id, observacao, status)
+
 select
-  m.nome,
-  m.codigo,
-  current_date,
-  m.unidade_id,
-  (select s.id
-     from public.setores s
-    where upper(trim(s.nome)) = upper(m.departamento)
-      and s.unidade_id is not distinct from m.unidade_id
-    order by s.id
-    limit 1),
-  case
-    when m.departamento is not null then 'Departamento na relação Grandal: ' || m.departamento
-  end,
-  case when m.departamento = 'LIXEIRA' then 'inativo' else 'ativo' end
-from mapeado m
-where not exists (
-  select 1 from public.patrimonios p
-   where p.nome = m.nome and p.modelo = m.codigo
-);
+  (select count(*) from tipos_novos) as tipos_criados,
+  (select count(*) from inseridos)   as patrimonios_inseridos,
+  (select count(*) from atualizados) as patrimonios_com_tipo_preenchido;
 
-commit;
-
--- Conferência
-select count(*) as total_importado
-from public.patrimonios
-where data_aquisicao = current_date;
+-- Conferência: quantidade de patrimônios por tipo
+select coalesce(t.nome, '(sem tipo)') as tipo, count(*) as quantidade
+from public.patrimonios p
+left join public.tipos t on t.id = p.tipo_id
+group by 1
+order by 2 desc;

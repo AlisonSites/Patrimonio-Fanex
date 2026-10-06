@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient.js'
 import { formatDate, patrimonioCodigo, todayISO } from '../lib/utils.js'
 import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
+import SearchableSelect from '../components/SearchableSelect.jsx'
 import { FaEdit, FaTrash, FaExchangeAlt, FaArrowRight } from 'react-icons/fa'
 
 const EMPTY_FORM = {
@@ -165,10 +166,15 @@ export default function Movimentacao() {
         <div className="card-header">
           <div className="toolbar">
             <input className="search-input" placeholder="Buscar por patrimônio, motivo..." value={search} onChange={(e) => setSearch(e.target.value)} />
-            <select className="filter-select" value={patrimonioFilter} onChange={(e) => setPatrimonioFilter(e.target.value)}>
-              <option value="todos">Todos os patrimônios</option>
-              {patrimonios.map((p) => <option key={p.id} value={p.id}>{patrimonioCodigo(p.id)} — {p.nome}</option>)}
-            </select>
+            <SearchableSelect
+              variant="filter"
+              value={patrimonioFilter}
+              onChange={setPatrimonioFilter}
+              options={[
+                { value: 'todos', label: 'Todos os patrimônios' },
+                ...patrimonios.map((p) => ({ value: p.id, label: `${patrimonioCodigo(p.id)} — ${p.nome} (${p.modelo})` })),
+              ]}
+            />
           </div>
           <button className="btn btn-primary" onClick={openNew} disabled={patrimonios.length === 0}>+ Nova Movimentação</button>
         </div>
@@ -225,15 +231,14 @@ export default function Movimentacao() {
           <form id="movimentacao-form" className="form-grid" onSubmit={handleSave}>
             <div className="field full">
               <label>Patrimônio *</label>
-              <select
+              <SearchableSelect
                 required
                 value={form.patrimonio_id}
-                onChange={(e) => handlePatrimonioChange(e.target.value)}
+                onChange={handlePatrimonioChange}
                 disabled={!!editing}
-              >
-                <option value="" disabled>Selecione o patrimônio</option>
-                {patrimonios.map((p) => <option key={p.id} value={p.id}>{patrimonioCodigo(p.id)} — {p.nome} ({p.modelo})</option>)}
-              </select>
+                placeholder="Selecione o patrimônio"
+                options={patrimonios.map((p) => ({ value: p.id, label: `${patrimonioCodigo(p.id)} — ${p.nome} (${p.modelo})` }))}
+              />
             </div>
 
             <div className="field full">
@@ -253,25 +258,23 @@ export default function Movimentacao() {
 
             <div className="field">
               <label>Nova Unidade *</label>
-              <select
+              <SearchableSelect
                 required
                 value={form.unidade_destino_id}
-                onChange={(e) => setForm({ ...form, unidade_destino_id: e.target.value, setor_destino_id: '' })}
-              >
-                <option value="" disabled>Selecione a unidade</option>
-                {unidades.map((u) => <option key={u.id} value={u.id}>{u.nome}</option>)}
-              </select>
+                onChange={(v) => setForm({ ...form, unidade_destino_id: v, setor_destino_id: '' })}
+                placeholder="Selecione a unidade"
+                options={unidades.map((u) => ({ value: u.id, label: u.nome }))}
+              />
             </div>
             <div className="field">
               <label>Novo Setor *</label>
-              <select
+              <SearchableSelect
                 required
                 value={form.setor_destino_id}
-                onChange={(e) => setForm({ ...form, setor_destino_id: e.target.value })}
-              >
-                <option value="" disabled>Selecione o setor</option>
-                {setoresDaUnidadeDestino.map((s) => <option key={s.id} value={s.id}>{s.nome}</option>)}
-              </select>
+                onChange={(v) => setForm({ ...form, setor_destino_id: v })}
+                placeholder="Selecione o setor"
+                options={setoresDaUnidadeDestino.map((s) => ({ value: s.id, label: s.nome }))}
+              />
             </div>
 
             <div className="field full">

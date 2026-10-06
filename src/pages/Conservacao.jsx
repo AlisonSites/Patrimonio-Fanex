@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient.js'
 import { formatCurrency, formatDate, patrimonioCodigo, todayISO } from '../lib/utils.js'
 import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
+import SearchableSelect from '../components/SearchableSelect.jsx'
 import { FaEdit, FaTrash, FaInbox, FaHeartbeat } from 'react-icons/fa'
 
 const ESTADOS = ['Ótimo', 'Bom', 'Regular', 'Ruim', 'Inservível']
@@ -114,10 +115,15 @@ export default function Conservacao() {
         <div className="card-header">
           <div className="toolbar">
             <input className="search-input" placeholder="Buscar por patrimônio, estado, observação..." value={search} onChange={(e) => setSearch(e.target.value)} />
-            <select className="filter-select" value={patrimonioFilter} onChange={(e) => setPatrimonioFilter(e.target.value)}>
-              <option value="todos">Todos os patrimônios</option>
-              {patrimonios.map((p) => <option key={p.id} value={p.id}>{patrimonioCodigo(p.id)} — {p.nome}</option>)}
-            </select>
+            <SearchableSelect
+              variant="filter"
+              value={patrimonioFilter}
+              onChange={setPatrimonioFilter}
+              options={[
+                { value: 'todos', label: 'Todos os patrimônios' },
+                ...patrimonios.map((p) => ({ value: p.id, label: `${patrimonioCodigo(p.id)} — ${p.nome} (${p.modelo})` })),
+              ]}
+            />
           </div>
           <button className="btn btn-primary" onClick={openNew} disabled={patrimonios.length === 0}>+ Novo Registro</button>
         </div>
@@ -173,10 +179,13 @@ export default function Conservacao() {
           <form id="conservacao-form" className="form-grid" onSubmit={handleSave}>
             <div className="field full">
               <label>Patrimônio *</label>
-              <select required value={form.patrimonio_id} onChange={(e) => setForm({ ...form, patrimonio_id: e.target.value })}>
-                <option value="" disabled>Selecione o patrimônio</option>
-                {patrimonios.map((p) => <option key={p.id} value={p.id}>{patrimonioCodigo(p.id)} — {p.nome} ({p.modelo})</option>)}
-              </select>
+              <SearchableSelect
+                required
+                value={form.patrimonio_id}
+                onChange={(v) => setForm({ ...form, patrimonio_id: v })}
+                placeholder="Selecione o patrimônio"
+                options={patrimonios.map((p) => ({ value: p.id, label: `${patrimonioCodigo(p.id)} — ${p.nome} (${p.modelo})` }))}
+              />
             </div>
             <div className="field">
               <label>Data *</label>
