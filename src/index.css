@@ -814,6 +814,24 @@ table.data-table {
   border-top: 1px solid var(--cinza-borda);
   font-size: 13px;
   color: var(--cinza-texto);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination-controls .btn {
+  padding: 6px 10px;
+}
+
+.pagination-controls .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .file-chip {

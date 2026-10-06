@@ -8,6 +8,8 @@ import FichaPatrimonio from '../components/FichaPatrimonio.jsx'
 import FileCaptureField from '../components/FileCaptureField.jsx'
 import { FaEdit, FaTrash, FaPaperclip, FaInbox, FaIdCard, FaCamera, FaImage } from 'react-icons/fa'
 
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
+
 const EMPTY_FORM = {
   modelo: '',
   nome: '',
@@ -42,6 +44,8 @@ export default function Patrimonio() {
   const [statusFilter, setStatusFilter] = useState('ativo')
   const [tipoFilter, setTipoFilter] = useState('todos')
   const [unidadeFilter, setUnidadeFilter] = useState('todos')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(25)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState(null)
@@ -92,36 +96,6 @@ export default function Patrimonio() {
   }
 
   useEffect(() => { load(); loadAuxData() }, [])
-
-  // Sempre que a lista de patrimônios mudar, gera as URLs assinadas das
-  // fotos que ainda não temos em cache, para exibir as miniaturas na tabela.
-  useEffect(() => {
-    const pathsFaltando = rows
-      .map((r) => r.foto)
-      .filter((path) => path && !thumbUrls[path])
-
-    if (pathsFaltando.length === 0) return
-
-    let cancelado = false
-    Promise.all(
-      pathsFaltando.map(async (path) => {
-        const url = await getArquivoUrl(FOTOS_PATRIMONIO_BUCKET, path, 3600)
-        return [path, url]
-      })
-    ).then((entradas) => {
-      if (cancelado) return
-      setThumbUrls((prev) => {
-        const novo = { ...prev }
-        for (const [path, url] of entradas) {
-          if (url) novo[path] = url
-        }
-        return novo
-      })
-    })
-
-    return () => { cancelado = true }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows])
 
   function openNew() {
     setForm(EMPTY_FORM)
@@ -324,6 +298,46 @@ export default function Patrimonio() {
     })
   }, [rows, search, statusFilter, tipoFilter, unidadeFilter])
 
+  // Volta para a primeira página quando os filtros mudam
+  useEffect(() => { setPage(1) }, [search, statusFilter, tipoFilter, unidadeFilter, pageSize])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const currentPage = Math.min(page, totalPages)
+  const paginated = useMemo(
+    () => filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filtered, currentPage, pageSize]
+  )
+
+  // Gera as URLs assinadas das fotos da página atual que ainda não temos
+  // em cache, para exibir as miniaturas na tabela.
+  useEffect(() => {
+    const pathsFaltando = paginated
+      .map((r) => r.foto)
+      .filter((path) => path && !thumbUrls[path])
+
+    if (pathsFaltando.length === 0) return
+
+    let cancelado = false
+    Promise.all(
+      pathsFaltando.map(async (path) => {
+        const url = await getArquivoUrl(FOTOS_PATRIMONIO_BUCKET, path, 3600)
+        return [path, url]
+      })
+    ).then((entradas) => {
+      if (cancelado) return
+      setThumbUrls((prev) => {
+        const novo = { ...prev }
+        for (const [path, url] of entradas) {
+          if (url) novo[path] = url
+        }
+        return novo
+      })
+    })
+
+    return () => { cancelado = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paginated])
+
   return (
     <div>
       {error && <div className="alert alert-error">{error}</div>}
@@ -364,7 +378,7 @@ export default function Patrimonio() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((row) => (
+                {paginated.map((row) => (
                   <tr key={row.id}>
                     <td>{patrimonioCodigo(row.id)}</td>
                     <td>
@@ -415,7 +429,23 @@ export default function Patrimonio() {
             </table>
           )}
         </div>
-        <div className="pagination"><span>{filtered.length} registro(s)</span></div>
+        <div className="pagination">
+          <span>
+            {filtered.length === 0
+              ? '0 registro(s)'
+              : `${(currentPage - 1) * pageSize + 1}–${Math.min(currentPage * pageSize, filtered.length)} de ${filtered.length} registro(s)`}
+          </span>
+          <div className="pagination-controls">
+            <select className="filter-select" value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))}>
+              {PAGE_SIZE_OPTIONS.map((n) => <option key={n} value={n}>{n} por página</option>)}
+            </select>
+            <button className="btn btn-secondary" onClick={() => setPage(1)} disabled={currentPage === 1}>«</button>
+            <button className="btn btn-secondary" onClick={() => setPage(currentPage - 1)} disabled={currentPage === 1}>‹ Anterior</button>
+            <span>Página {currentPage} de {totalPages}</span>
+            <button className="btn btn-secondary" onClick={() => setPage(currentPage + 1)} disabled={currentPage === totalPages}>Próxima ›</button>
+            <button className="btn btn-secondary" onClick={() => setPage(totalPages)} disabled={currentPage === totalPages}>»</button>
+          </div>
+        </div>
       </div>
 
       {modalOpen && (
