@@ -5,6 +5,7 @@ import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { FaEdit, FaTrash, FaExchangeAlt, FaArrowRight } from 'react-icons/fa'
+import { usePodeEditar } from '../lib/permissoes.js'
 
 const EMPTY_FORM = {
   patrimonio_id: '',
@@ -15,6 +16,7 @@ const EMPTY_FORM = {
 }
 
 export default function Movimentacao() {
+  const podeEditar = usePodeEditar()
   const [rows, setRows] = useState([])
   const [patrimonios, setPatrimonios] = useState([])
   const [unidades, setUnidades] = useState([])
@@ -176,7 +178,7 @@ export default function Movimentacao() {
               ]}
             />
           </div>
-          <button className="btn btn-primary" onClick={openNew} disabled={patrimonios.length === 0}>+ Nova Movimentação</button>
+          {podeEditar && <button className="btn btn-primary" onClick={openNew} disabled={patrimonios.length === 0}>+ Nova Movimentação</button>}
         </div>
 
         <div className="table-wrap">
@@ -202,8 +204,8 @@ export default function Movimentacao() {
                     <td>{row.motivo || '-'}</td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
-                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>
+                        {podeEditar && <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>}
+                        {podeEditar && <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>}
                       </div>
                     </td>
                   </tr>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient.js'
 import PasswordInput from '../components/PasswordInput.jsx'
+import { carregarPerfil, salvarUsuarioLogado } from '../lib/auth.js'
 import Logo from '../assets/logo-branco.png'
 import './Login.css'
 
@@ -55,24 +56,9 @@ export default function Login() {
 
     // Busca o perfil de acesso do usuário (feito à parte para não depender
     // do retorno da função autenticar_usuario, que já está em produção).
-    let perfilNome = null
-    let perfilIsAdmin = false
-    if (usuario.perfil_id) {
-      const { data: perfil } = await supabase
-        .from('perfis')
-        .select('nome, is_admin')
-        .eq('id', usuario.perfil_id)
-        .maybeSingle()
-      if (perfil) {
-        perfilNome = perfil.nome
-        perfilIsAdmin = !!perfil.is_admin
-      }
-    }
+    const perfil = await carregarPerfil(usuario.perfil_id)
 
-    localStorage.setItem(
-      'usuarioLogado',
-      JSON.stringify({ ...usuario, perfil_nome: perfilNome, perfil_is_admin: perfilIsAdmin })
-    )
+    salvarUsuarioLogado({ ...usuario, ...perfil })
     navigate('/', { replace: true })
   }
 
@@ -87,8 +73,8 @@ export default function Login() {
           <span>Sistema de Gestão</span>
         </div>
         <p className="login-marca-texto">
-          Acesse com seu CPF e senha para gerenciar tipos, unidades, setores, responsáveis
-          e o patrimônio da instituição.
+          Acesse com seu CPF e senha para gerenciar o patrimônio da instituição, os
+          Chromebooks dos alunos e da escola, empréstimos e manutenções.
         </p>
       </div>
 

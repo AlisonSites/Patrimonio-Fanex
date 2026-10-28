@@ -271,11 +271,14 @@ export default function Relatorios() {
   function handleExportPDF() {
     exportToPDF({
       title: tituloRelatorio,
-      subtitle: `Controle de Patrimônio Escolar — ${qtdRegistros} registro(s)`,
+      subtitle: 'Controle de Patrimônio Escolar',
       columns: colunasAtuais,
       rows: linhasAtuais,
       filename: `relatorio_${relatorio}_${new Date().toISOString().slice(0, 10)}`,
-      totalsText: `Valor total: ${formatCurrency(totalGeral)}`,
+      resumo: [
+        { rotulo: 'Bens', valor: String(qtdRegistros) },
+        { rotulo: 'Valor total', valor: formatCurrency(totalGeral) },
+      ],
     })
   }
 
@@ -299,12 +302,12 @@ export default function Relatorios() {
         </div>
         <div className="kpi-card">
           <div className="kpi-label">Bens Íntegros</div>
-          <div className="kpi-value" style={{ color: 'var(--verde)' }}>{formatCurrency(resumoGeral.valorIntegros)}</div>
+          <div className="kpi-value texto-verde">{formatCurrency(resumoGeral.valorIntegros)}</div>
           <div className="kpi-extra">{resumoGeral.qtdIntegros} bem(ns) sem quebra</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-label">Bens Quebrados</div>
-          <div className="kpi-value" style={{ color: 'var(--vermelho)' }}>{formatCurrency(resumoGeral.valorQuebrados)}</div>
+          <div className="kpi-value texto-vermelho">{formatCurrency(resumoGeral.valorQuebrados)}</div>
           <div className="kpi-extra">{resumoGeral.qtdQuebrados} bem(ns) quebrado(s)</div>
         </div>
         <div className="kpi-card">
@@ -314,9 +317,9 @@ export default function Relatorios() {
         </div>
       </div>
 
-      <div className="card" style={{ marginBottom: 18 }}>
+      <div className="card secao">
         <div className="card-body">
-          <div className="field full" style={{ marginBottom: 16 }}>
+          <div className="field full secao-campo">
             <label>Tipo de Relatório</label>
             <select className="filter-select" value={relatorio} onChange={(e) => setRelatorio(e.target.value)}>
               {TIPOS_RELATORIO.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}

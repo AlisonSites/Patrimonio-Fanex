@@ -4,8 +4,12 @@ import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { FaEdit, FaTrash, FaInbox } from 'react-icons/fa'
+import { MODULOS } from '../lib/modulos.jsx'
+import { NIVEIS } from '../lib/permissoes.js'
+import { usePodeEditar } from '../lib/permissoes.js'
 
 export default function Perfil() {
+  const podeEditar = usePodeEditar()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -22,7 +26,7 @@ export default function Perfil() {
     setError('')
     const { data, error: err } = await supabase
       .from('perfis')
-      .select('id, nome, descricao, is_admin, status, created_at')
+      .select('id, nome, descricao, is_admin, permissoes, status, created_at')
       .order('created_at', { ascending: false })
     if (err) setError(err.message)
     else setRows(data || [])
@@ -32,13 +36,13 @@ export default function Perfil() {
   useEffect(() => { load() }, [])
 
   function openNew() {
-    setForm({ nome: '', descricao: '', is_admin: false, status: 'ativo' })
+    setForm({ nome: '', descricao: '', is_admin: false, permissoes: {}, status: 'ativo' })
     setEditing(null)
     setModalOpen(true)
   }
 
   function openEdit(row) {
-    setForm({ ...row })
+    setForm({ ...row, permissoes: row.permissoes || {} })
     setEditing(row)
     setModalOpen(true)
   }
@@ -58,6 +62,7 @@ export default function Perfil() {
       nome: form.nome.trim(),
       descricao: form.descricao?.trim() || null,
       is_admin: !!form.is_admin,
+      permissoes: form.permissoes || {},
       status: form.status || 'ativo',
     }
 
@@ -120,7 +125,7 @@ export default function Perfil() {
               <option value="inativo">Inativo</option>
             </select>
           </div>
-          <button className="btn btn-primary" onClick={openNew}>+ Novo Perfil</button>
+          {podeEditar && <button className="btn btn-primary" onClick={openNew}>+ Novo Perfil</button>}
         </div>
 
         <div className="table-wrap">
@@ -131,19 +136,19 @@ export default function Perfil() {
           ) : (
             <table className="data-table">
               <thead>
-                <tr><th>Nome</th><th>Descrição</th><th>Administrador</th><th>Status</th><th>Ações</th></tr>
+                <tr><th>Nome</th><th>Descrição</th><th>Acesso</th><th>Status</th><th>Ações</th></tr>
               </thead>
               <tbody>
                 {filtered.map((row) => (
                   <tr key={row.id}>
                     <td>{row.nome}</td>
                     <td>{row.descricao || '-'}</td>
-                    <td>{row.is_admin ? 'Sim' : 'Não'}</td>
+                    <td>{resumoAcesso(row)}</td>
                     <td><StatusBadge status={row.status} /></td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
-                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>
+                        {podeEditar && <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>}
+                        {podeEditar && <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>}
                       </div>
                     </td>
                   </tr>
@@ -159,6 +164,7 @@ export default function Perfil() {
         <Modal
           title={editing ? 'Editar Perfil' : 'Novo Perfil'}
           onClose={() => setModalOpen(false)}
+          maxWidth={820}
           footer={
             <>
               <button className="btn btn-secondary" onClick={() => setModalOpen(false)}>Cancelar</button>
@@ -196,9 +202,18 @@ export default function Perfil() {
                 Perfil de administrador
               </label>
               <div className="field-hint">
-                Usuários com este perfil podem cadastrar outros usuários e perfis de acesso.
+                Acesso total a todos os módulos e páginas, inclusive usuários e perfis.
               </div>
             </div>
+            {!form.is_admin && (
+              <div className="field full">
+                <label>Permissões por página</label>
+                <PermissoesEditor
+                  value={form.permissoes || {}}
+                  onChange={(permissoes) => setForm({ ...form, permissoes })}
+                />
+              </div>
+            )}
             <div className="field full">
               <label>Status</label>
               <select value={form.status || 'ativo'} onChange={(e) => setForm({ ...form, status: e.target.value })}>
@@ -219,6 +234,73 @@ export default function Perfil() {
           danger
         />
       )}
+    </div>
+  )
+}
+
+// Texto curto da coluna "Acesso": módulos liberados para o perfil
+function resumoAcesso(perfil) {
+  if (perfil.is_admin) return 'Administrador (total)'
+  const permissoes = perfil.permissoes || {}
+  const modulos = MODULOS.filter((m) => m.paginas.some((p) => permissoes[p.chave]))
+  return modulos.length ? modulos.map((m) => m.label).join(', ') : 'Nenhum'
+}
+
+// Matriz de permissões: para cada página, Sem acesso / Visualizar / Editar
+function PermissoesEditor({ value, onChange }) {
+  function setNivel(chave, nivel) {
+    const novo = { ...value }
+    if (nivel) novo[chave] = nivel
+    else delete novo[chave]
+    onChange(novo)
+  }
+
+  function setModulo(modulo, nivel) {
+    const novo = { ...value }
+    modulo.paginas.forEach((p) => {
+      const n = nivel === 'editar' && p.somenteVer ? 'ver' : nivel
+      if (n) novo[p.chave] = n
+      else delete novo[p.chave]
+    })
+    onChange(novo)
+  }
+
+  return (
+    <div className="permissoes">
+      {MODULOS.map((m) => (
+        <div key={m.key} className="permissoes-modulo">
+          <div className="permissoes-modulo-header">
+            <span className="permissoes-modulo-titulo">{m.icon} {m.label}</span>
+            <div className="permissoes-atalhos">
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setModulo(m, '')}>Nenhum</button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setModulo(m, 'ver')}>Tudo visualizar</button>
+              <button type="button" className="btn btn-ghost btn-sm" onClick={() => setModulo(m, 'editar')}>Tudo editar</button>
+            </div>
+          </div>
+          {m.paginas.map((p) => (
+            <div key={p.chave} className="permissoes-linha">
+              <span>{p.label}</span>
+              <div className="permissoes-niveis">
+                {NIVEIS.filter((n) => !(p.somenteVer && n.value === 'editar')).map((n) => (
+                  <label key={n.value} className={`permissoes-nivel ${(value[p.chave] || '') === n.value ? 'ativo' : ''}`}>
+                    <input
+                      type="radio"
+                      name={`perm-${p.chave}`}
+                      checked={(value[p.chave] || '') === n.value}
+                      onChange={() => setNivel(p.chave, n.value)}
+                    />
+                    {n.label}
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
+      <div className="field-hint">
+        <strong>Visualizar</strong>: só consulta. <strong>Editar</strong>: pode incluir, alterar e excluir.
+        O card do módulo aparece na tela inicial quando o perfil tem acesso a pelo menos uma página dele.
+      </div>
     </div>
   )
 }

@@ -5,8 +5,11 @@ import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
+import { FaEdit, FaTrash } from 'react-icons/fa'
+import { usePodeEditar } from '../lib/permissoes.js'
 
 export default function Setor() {
+  const podeEditar = usePodeEditar()
   const [rows, setRows] = useState([])
   const [unidades, setUnidades] = useState([])
   const [loading, setLoading] = useState(true)
@@ -99,7 +102,7 @@ export default function Setor() {
               <option value="inativo">Inativo</option>
             </select>
           </div>
-          <button className="btn btn-primary" onClick={openNew}>+ Novo Setor</button>
+          {podeEditar && <button className="btn btn-primary" onClick={openNew}>+ Novo Setor</button>}
         </div>
 
         <div className="table-wrap">
@@ -123,8 +126,8 @@ export default function Setor() {
                     <td><StatusBadge status={row.status} /></td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}>✎</button>
-                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}>🗑</button>
+                        {podeEditar && <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>}
+                        {podeEditar && <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>}
                       </div>
                     </td>
                   </tr>

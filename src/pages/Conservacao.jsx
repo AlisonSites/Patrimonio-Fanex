@@ -5,6 +5,7 @@ import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { FaEdit, FaTrash, FaInbox, FaHeartbeat } from 'react-icons/fa'
+import { usePodeEditar } from '../lib/permissoes.js'
 
 const ESTADOS = ['Ótimo', 'Bom', 'Regular', 'Ruim', 'Inservível']
 
@@ -17,6 +18,7 @@ const EMPTY_FORM = {
 }
 
 export default function Conservacao() {
+  const podeEditar = usePodeEditar()
   const [rows, setRows] = useState([])
   const [patrimonios, setPatrimonios] = useState([])
   const [loading, setLoading] = useState(true)
@@ -125,7 +127,7 @@ export default function Conservacao() {
               ]}
             />
           </div>
-          <button className="btn btn-primary" onClick={openNew} disabled={patrimonios.length === 0}>+ Novo Registro</button>
+          {podeEditar && <button className="btn btn-primary" onClick={openNew} disabled={patrimonios.length === 0}>+ Novo Registro</button>}
         </div>
 
         <div className="table-wrap">
@@ -150,8 +152,8 @@ export default function Conservacao() {
                     <td>{row.observacao || '-'}</td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
-                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>
+                        {podeEditar && <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>}
+                        {podeEditar && <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>}
                       </div>
                     </td>
                   </tr>

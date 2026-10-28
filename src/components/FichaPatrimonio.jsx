@@ -31,9 +31,11 @@ export default function FichaPatrimonio({
           <button className="icon-btn" title="Imprimir ficha" onClick={handlePrint}>
             <FaPrint />
           </button>
-          <button className="icon-btn" title="Editar" onClick={() => onEdit(patrimonio)}>
-            <FaEdit />
-          </button>
+          {onEdit && (
+            <button className="icon-btn" title="Editar" onClick={() => onEdit(patrimonio)}>
+              <FaEdit />
+            </button>
+          )}
           {patrimonio.nota_fiscal_arquivo && (
             <button
               className="icon-btn"

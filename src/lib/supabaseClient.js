@@ -9,7 +9,29 @@ if (!supabaseUrl || !supabaseKey) {
   )
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+// Envia o id do usuário logado nas requisições ao banco, para que o log de
+// auditoria saiba quem fez cada alteração (ver supabase_permissoes_auditoria.sql).
+// Só nas chamadas à API REST — o Storage não precisa dessa informação.
+function fetchComUsuario(input, init = {}) {
+  const url = typeof input === 'string' ? input : input?.url || ''
+  if (!url.includes('/rest/v1/')) return fetch(input, init)
+
+  let usuarioId = null
+  try {
+    usuarioId = JSON.parse(localStorage.getItem('usuarioLogado') || 'null')?.id ?? null
+  } catch {
+    usuarioId = null
+  }
+  if (usuarioId == null) return fetch(input, init)
+
+  const headers = new Headers(init.headers || (typeof input === 'string' ? undefined : input.headers))
+  headers.set('x-usuario-id', String(usuarioId))
+  return fetch(input, { ...init, headers })
+}
+
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  global: { fetch: fetchComUsuario },
+})
 
 // Nome do bucket de storage usado para anexar notas fiscais
 export const NOTAS_FISCAIS_BUCKET = 'notas-fiscais'

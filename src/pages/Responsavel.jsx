@@ -6,8 +6,10 @@ import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { FaEdit, FaTrash, FaInbox } from 'react-icons/fa'
+import { usePodeEditar } from '../lib/permissoes.js'
 
 export default function Responsavel() {
+  const podeEditar = usePodeEditar()
   const [rows, setRows] = useState([])
   const [setores, setSetores] = useState([])
   const [loading, setLoading] = useState(true)
@@ -105,7 +107,7 @@ export default function Responsavel() {
               <option value="inativo">Inativo</option>
             </select>
           </div>
-          <button className="btn btn-primary" onClick={openNew}>+ Novo Responsável</button>
+          {podeEditar && <button className="btn btn-primary" onClick={openNew}>+ Novo Responsável</button>}
         </div>
 
         <div className="table-wrap">
@@ -130,8 +132,8 @@ export default function Responsavel() {
                     <td><StatusBadge status={row.status} /></td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
-                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>
+                        {podeEditar && <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>}
+                        {podeEditar && <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>}
                       </div>
                     </td>
                   </tr>

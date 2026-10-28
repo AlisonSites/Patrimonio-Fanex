@@ -5,6 +5,7 @@ import Modal from './Modal.jsx'
 import ConfirmDialog from './ConfirmDialog.jsx'
 import StatusBadge from './StatusBadge.jsx'
 import { FaEdit, FaTrash, FaInbox } from 'react-icons/fa'
+import { usePodeEditar } from '../lib/permissoes.js'
 
 /**
  * CRUD simples e configurável, usado nas telas de Tipo, Unidade e Fornecedor.
@@ -12,6 +13,7 @@ import { FaEdit, FaTrash, FaInbox } from 'react-icons/fa'
  * fields: [{ key, label, type: 'text', required }]
  */
 export default function CrudSimples({ table, entityLabel, codePrefix, fields }) {
+  const podeEditar = usePodeEditar()
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -104,7 +106,7 @@ export default function CrudSimples({ table, entityLabel, codePrefix, fields }) 
               <option value="inativo">Inativo</option>
             </select>
           </div>
-          <button className="btn btn-primary" onClick={openNew}>+ Novo {entityLabel}</button>
+          {podeEditar && <button className="btn btn-primary" onClick={openNew}>+ Novo {entityLabel}</button>}
         </div>
 
         <div className="table-wrap">
@@ -133,8 +135,8 @@ export default function CrudSimples({ table, entityLabel, codePrefix, fields }) 
                     <td><StatusBadge status={row.status} /></td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
-                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>
+                        {podeEditar && <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>}
+                        {podeEditar && <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>}
                       </div>
                     </td>
                   </tr>

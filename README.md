@@ -19,6 +19,12 @@ Cores do projeto: `#000045` (azul, predominante), `#FF5400` (laranja, destaque),
    - O bucket de Storage `notas-fiscais` (para anexar os arquivos das notas fiscais) e suas políticas de acesso.
    - Alguns tipos e unidades de exemplo (pode apagar depois pela própria tela de cadastro).
 
+Depois rode, **nesta ordem**, os scripts complementares (todos podem ser executados mais de uma vez):
+
+1. `supabase_perfis.sql`: perfis de acesso.
+2. `supabase_chromebook.sql`: módulo Chromebook (turmas, alunos, chromebooks, manutenções, empréstimos e as regras automáticas de status).
+3. `supabase_permissoes_auditoria.sql`: permissões por página nos perfis e log de auditoria.
+
 ### 1.2. Conferir as tabelas
 Vá em **Table Editor** e confira se apareceram as 6 tabelas listadas acima.
 
@@ -99,6 +105,20 @@ patrimonio-escola/
 ---
 
 ## 4. Funcionalidades por página
+
+Depois do login aparece a **tela inicial com um card por módulo** (Patrimônio, Chromebooks e Administração). Os cards e o menu de cada módulo seguem as permissões do perfil do usuário, configuradas em **Administração > Perfis de Acesso** (página por página: sem acesso, visualizar ou editar).
+
+### Módulo Chromebooks
+- **Chromebooks dos Alunos / da Escola**: nº de série, marca, aluno (para os do aluno) e status. Os status "Emprestado" e "Em manutenção" são controlados automaticamente pelo banco.
+- **Empréstimos**: só Chromebooks da escola disponíveis; pode ficar ligado à manutenção do Chromebook do aluno. Avisa quando a manutenção terminou e o aparelho da escola precisa ser recolhido.
+- **Manutenção**: Chromebook, aluno (automático para os do aluno), ida, tipos de quebra (vários), ticket da Geekie (obrigatório), status, custo e quem paga. Ao finalizar, o Chromebook volta a ficar disponível / com o aluno.
+- **Alunos** (com importação por CSV) e **Turmas** (por unidade, ano letivo e turno).
+- **Dashboard** com busca rápida por nº de série (funciona com leitor de código de barras) e **Relatórios** em CSV/PDF.
+
+### Administração
+- **Visão Geral** dos dois módulos (com PDF), **Usuários**, **Perfis de Acesso**, **Unidades** e **Auditoria** (quem incluiu, alterou ou excluiu cada registro).
+
+### Módulo Patrimônio
 
 - **Dashboard**: totais gerais (quantidade, valores, garantias vencendo em 30 dias) e detalhamento por Tipo, Unidade, Setor e Responsável, com abas.
 - **Cadastro de Patrimônio**: todos os campos pedidos (ID automático, modelo, nome, número de série, nota fiscal com upload opcional de arquivo, aquisição, valor original, valor de compra, vencimento de garantia, tipo, unidade, setor, responsável, fornecedor, observação e status). O setor é filtrado automaticamente pela unidade escolhida.

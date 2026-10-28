@@ -8,6 +8,7 @@ import FichaPatrimonio from '../components/FichaPatrimonio.jsx'
 import FileCaptureField from '../components/FileCaptureField.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import { FaEdit, FaTrash, FaPaperclip, FaInbox, FaIdCard, FaCamera, FaImage } from 'react-icons/fa'
+import { usePodeEditar } from '../lib/permissoes.js'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
 
@@ -32,6 +33,7 @@ const EMPTY_FORM = {
 }
 
 export default function Patrimonio() {
+  const podeEditar = usePodeEditar()
   const [rows, setRows] = useState([])
   const [tipos, setTipos] = useState([])
   const [unidades, setUnidades] = useState([])
@@ -371,7 +373,7 @@ export default function Patrimonio() {
               <option value="inativo">Inativo</option>
             </select>
           </div>
-          <button className="btn btn-primary" onClick={openNew}>+ Novo Patrimônio</button>
+          {podeEditar && <button className="btn btn-primary" onClick={openNew}>+ Novo Patrimônio</button>}
         </div>
 
         <div className="table-wrap">
@@ -430,8 +432,8 @@ export default function Patrimonio() {
                         {row.foto && (
                           <button className="icon-btn" title="Ver foto do produto" onClick={() => handleAbrirFoto(row.foto)}><FaImage /></button>
                         )}
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
-                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>
+                        {podeEditar && <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>}
+                        {podeEditar && <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>}
                       </div>
                     </td>
                   </tr>
@@ -634,7 +636,7 @@ export default function Patrimonio() {
           quebrados={fichaQuebrados}
           historicoLoading={fichaHistoricoLoading}
           onClose={() => setFicha(null)}
-          onEdit={handleFichaEditar}
+          onEdit={podeEditar ? handleFichaEditar : null}
           onAbrirNotaFiscal={handleAbrirArquivo}
         />
       )}

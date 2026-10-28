@@ -5,6 +5,7 @@ import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import PasswordInput from '../components/PasswordInput.jsx'
 import { FaEdit, FaTrash, FaInbox } from 'react-icons/fa'
+import { usePodeEditar } from '../lib/permissoes.js'
 
 function formatarCpf(valor) {
   const digitos = (valor || '').replace(/\D/g, '').slice(0, 11)
@@ -15,6 +16,7 @@ function formatarCpf(valor) {
 }
 
 export default function Usuario() {
+  const podeEditar = usePodeEditar()
   const [rows, setRows] = useState([])
   const [perfis, setPerfis] = useState([])
   const [loading, setLoading] = useState(true)
@@ -149,7 +151,7 @@ export default function Usuario() {
               <option value="inativo">Inativo</option>
             </select>
           </div>
-          <button className="btn btn-primary" onClick={openNew}>+ Novo Usuário</button>
+          {podeEditar && <button className="btn btn-primary" onClick={openNew}>+ Novo Usuário</button>}
         </div>
 
         <div className="table-wrap">
@@ -171,8 +173,8 @@ export default function Usuario() {
                     <td><StatusBadge status={row.status} /></td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
-                        <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>
+                        {podeEditar && <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>}
+                        {podeEditar && <button className="icon-btn danger" title="Excluir" onClick={() => setDeleting(row)}><FaTrash /></button>}
                       </div>
                     </td>
                   </tr>

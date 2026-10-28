@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../lib/supabaseClient.js'
 import { formatCurrency, formatDate, patrimonioCodigo } from '../lib/utils.js'
+import BarList from '../components/BarList.jsx'
 
 const TABS = [
   { key: 'geral', label: 'Geral' },
@@ -149,12 +150,12 @@ export default function Dashboard() {
         </div>
         <div className="kpi-card">
           <div className="kpi-label">Bens Íntegros</div>
-          <div className="kpi-value" style={{ color: 'var(--verde)' }}>{formatCurrency(geral.valorIntegros)}</div>
+          <div className="kpi-value texto-verde">{formatCurrency(geral.valorIntegros)}</div>
           <div className="kpi-extra">{geral.qtdIntegros} bem(ns) sem quebra</div>
         </div>
         <div className="kpi-card">
           <div className="kpi-label">Bens Quebrados</div>
-          <div className="kpi-value" style={{ color: 'var(--vermelho)' }}>{formatCurrency(geral.valorQuebrados)}</div>
+          <div className="kpi-value texto-vermelho">{formatCurrency(geral.valorQuebrados)}</div>
           <div className="kpi-extra">{geral.qtdQuebrados} bem(ns) quebrado(s)</div>
         </div>
         <div className="kpi-card">
@@ -198,25 +199,25 @@ export default function Dashboard() {
         </div>
       ) : tab === 'quebrados' ? (
         <div>
-          <div className="kpi-grid" style={{ marginBottom: 18 }}>
+          <div className="kpi-grid secao">
             <div className="kpi-card">
               <div className="kpi-label">Quantidade Quebrados</div>
-              <div className="kpi-value" style={{ color: 'var(--vermelho)' }}>{geral.qtdQuebrados}</div>
+              <div className="kpi-value texto-vermelho">{geral.qtdQuebrados}</div>
               <div className="kpi-extra">de {geral.total} patrimônios</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Valor Total Quebrados</div>
-              <div className="kpi-value" style={{ color: 'var(--vermelho)' }}>{formatCurrency(geral.valorQuebrados)}</div>
+              <div className="kpi-value texto-vermelho">{formatCurrency(geral.valorQuebrados)}</div>
               <div className="kpi-extra">{geral.total ? Math.round((geral.qtdQuebrados / geral.total) * 100) : 0}% do valor geral</div>
             </div>
             <div className="kpi-card">
               <div className="kpi-label">Motivo Mais Comum</div>
-              <div className="kpi-value" style={{ fontSize: 18 }}>{motivoMaisComum}</div>
+              <div className="kpi-value kpi-value-texto">{motivoMaisComum}</div>
               <div className="kpi-extra">entre os registros de quebra</div>
             </div>
           </div>
 
-          <div className="grid-2" style={{ marginBottom: 18 }}>
+          <div className="grid-2 secao">
             <GroupCard title="Quebrados por Motivo" data={quebradosPorMotivo} accent="var(--vermelho)" />
             <GroupCard title="Quebrados por Tipo" data={quebradosPorTipo} accent="var(--vermelho)" />
           </div>
@@ -232,7 +233,7 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {quebrados.length === 0 ? (
-                    <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--cinza-texto)' }}>Sem registros de quebra.</td></tr>
+                    <tr><td colSpan={5} className="celula-vazia">Sem registros de quebra.</td></tr>
                   ) : quebrados.map((q) => (
                     <tr key={q.id}>
                       <td>{patrimonioCodigo(q.patrimonio_id)} — {q.patrimonios?.nome || '-'}</td>
@@ -261,7 +262,7 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {groupedData[tab].length === 0 ? (
-                  <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--cinza-texto)' }}>Sem dados.</td></tr>
+                  <tr><td colSpan={6} className="celula-vazia">Sem dados.</td></tr>
                 ) : groupedData[tab].map((g) => (
                   <tr key={g.label}>
                     <td>{g.label}</td>
@@ -281,28 +282,13 @@ export default function Dashboard() {
   )
 }
 
+// Barras por grupo mostrando quantidade e valor de compra
 function GroupCard({ title, data, accent }) {
-  const max = Math.max(1, ...data.map((d) => d.total))
   return (
-    <div className="card">
-      <div className="card-header"><h3>{title}</h3></div>
-      <div className="card-body">
-        {data.length === 0 ? (
-          <div style={{ color: 'var(--cinza-texto)', fontSize: 13.5 }}>Sem dados.</div>
-        ) : (
-          data.map((d) => (
-            <div key={d.label} style={{ marginBottom: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13.5, marginBottom: 5 }}>
-                <span style={{ fontWeight: 600, color: 'var(--azul)' }}>{d.label}</span>
-                <span style={{ color: 'var(--cinza-texto)' }}>{d.total} · {formatCurrency(d.valor)}</span>
-              </div>
-              <div style={{ background: 'var(--cinza-bg)', borderRadius: 6, height: 8, overflow: 'hidden' }}>
-                <div style={{ width: `${(d.total / max) * 100}%`, height: '100%', background: accent || 'var(--laranja)' }} />
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+    <BarList
+      title={title}
+      accent={accent}
+      data={data.map((d) => ({ ...d, extra: `${d.total} · ${formatCurrency(d.valor)}` }))}
+    />
   )
 }

@@ -6,6 +6,7 @@ import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import { FaEdit, FaTrash, FaExclamationTriangle } from 'react-icons/fa'
+import { usePodeEditar } from '../lib/permissoes.js'
 
 const EMPTY_FORM = {
   patrimonio_id: '',
@@ -15,6 +16,7 @@ const EMPTY_FORM = {
 }
 
 export default function Quebrado() {
+  const podeEditar = usePodeEditar()
   const [rows, setRows] = useState([])
   const [patrimonios, setPatrimonios] = useState([])
   const [loading, setLoading] = useState(true)
@@ -128,7 +130,7 @@ export default function Quebrado() {
               ]}
             />
           </div>
-          <button className="btn btn-primary" onClick={openNew} disabled={patrimonios.length === 0}>+ Registrar Quebra</button>
+          {podeEditar && <button className="btn btn-primary" onClick={openNew} disabled={patrimonios.length === 0}>+ Registrar Quebra</button>}
         </div>
 
         <div className="table-wrap">
@@ -153,8 +155,8 @@ export default function Quebrado() {
                     <td><StatusBadge status={row.patrimonios?.status} /></td>
                     <td>
                       <div className="row-actions">
-                        <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>
-                        <button className="icon-btn danger" title="Excluir (reativa o patrimônio)" onClick={() => setDeleting(row)}><FaTrash /></button>
+                        {podeEditar && <button className="icon-btn" title="Editar" onClick={() => openEdit(row)}><FaEdit /></button>}
+                        {podeEditar && <button className="icon-btn danger" title="Excluir (reativa o patrimônio)" onClick={() => setDeleting(row)}><FaTrash /></button>}
                       </div>
                     </td>
                   </tr>
