@@ -17,6 +17,7 @@ import Relatorios from './pages/Relatorios.jsx'
 import Login from './pages/Login.jsx'
 import Usuario from './pages/Usuario.jsx'
 import Perfil from './pages/Perfil.jsx'
+import MeuPerfil from './pages/MeuPerfil.jsx'
 import DashboardChromebook from './pages/chromebook/DashboardChromebook.jsx'
 import Chromebooks from './pages/chromebook/Chromebooks.jsx'
 import Emprestimos from './pages/chromebook/Emprestimos.jsx'
@@ -47,6 +48,7 @@ export default function App() {
         }
       >
         <Route path="/" element={<Inicio />} />
+        <Route path="/meu-perfil" element={<MeuPerfil />} />
 
         {/* Módulo Patrimônio */}
         <Route path="/patrimonio" element={p('patrimonio.dashboard', <Dashboard />)} />

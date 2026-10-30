@@ -1,18 +1,20 @@
 import { useEffect, useMemo, useState } from 'react'
-import { supabase } from '../lib/supabaseClient.js'
+import { supabase, fotoUsuarioUrl } from '../lib/supabaseClient.js'
 import Modal from '../components/Modal.jsx'
 import ConfirmDialog from '../components/ConfirmDialog.jsx'
 import StatusBadge from '../components/StatusBadge.jsx'
 import PasswordInput from '../components/PasswordInput.jsx'
 import { FaEdit, FaTrash, FaInbox } from 'react-icons/fa'
 import { usePodeEditar } from '../lib/permissoes.js'
+import { emailValido, formatarCpf, formatarTelefone, formatDate } from '../lib/utils.js'
 
-function formatarCpf(valor) {
-  const digitos = (valor || '').replace(/\D/g, '').slice(0, 11)
-  return digitos
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+function iniciais(nome) {
+  return (nome || '?')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join('')
 }
 
 export default function Usuario() {
@@ -34,7 +36,7 @@ export default function Usuario() {
     setError('')
     const { data, error: err } = await supabase
       .from('usuarios')
-      .select('id, nome, cpf, status, criado_em, perfil_id, perfis(nome)')
+      .select('id, nome, cpf, email, telefone, data_nascimento, foto, status, criado_em, perfil_id, perfis(nome)')
       .order('criado_em', { ascending: false })
     if (err) setError(err.message)
     else setRows(data || [])
@@ -53,7 +55,7 @@ export default function Usuario() {
   useEffect(() => { load(); loadPerfis() }, [])
 
   function openNew() {
-    setForm({ nome: '', cpf: '', senha: '', status: 'ativo', perfil_id: '' })
+    setForm({ nome: '', cpf: '', email: '', telefone: '', data_nascimento: '', senha: '', status: 'ativo', perfil_id: '' })
     setEditing(null)
     setModalOpen(true)
   }
@@ -62,6 +64,9 @@ export default function Usuario() {
     setForm({
       nome: row.nome,
       cpf: formatarCpf(row.cpf),
+      email: row.email || '',
+      telefone: formatarTelefone(row.telefone),
+      data_nascimento: row.data_nascimento || '',
       senha: '',
       status: row.status,
       perfil_id: row.perfil_id || '',
@@ -81,6 +86,18 @@ export default function Usuario() {
       setSaving(false)
       return
     }
+    const email = (form.email || '').trim().toLowerCase()
+    if (email && !emailValido(email)) {
+      setError('Informe um e-mail válido.')
+      setSaving(false)
+      return
+    }
+    const telefone = (form.telefone || '').replace(/\D/g, '')
+    if (telefone && telefone.length < 10) {
+      setError('Informe um telefone válido, com DDD.')
+      setSaving(false)
+      return
+    }
     if (!editing && !form.senha) {
       setError('Defina uma senha para o novo usuário.')
       setSaving(false)
@@ -92,28 +109,28 @@ export default function Usuario() {
       return
     }
 
+    const payload = {
+      nome: form.nome.trim(),
+      cpf: cpfLimpo,
+      email: email || null,
+      telefone: telefone || null,
+      data_nascimento: form.data_nascimento || null,
+      status: form.status || 'ativo',
+      perfil_id: form.perfil_id,
+    }
+    if (form.senha) payload.senha = form.senha
+
     let err
     if (editing) {
-      const payload = {
-        nome: form.nome.trim(),
-        cpf: cpfLimpo,
-        status: form.status || 'ativo',
-        perfil_id: form.perfil_id,
-      }
-      if (form.senha) payload.senha = form.senha
       ;({ error: err } = await supabase.from('usuarios').update(payload).eq('id', editing.id))
     } else {
-      ;({ error: err } = await supabase.from('usuarios').insert({
-        nome: form.nome.trim(),
-        cpf: cpfLimpo,
-        senha: form.senha,
-        status: form.status || 'ativo',
-        perfil_id: form.perfil_id,
-      }))
+      ;({ error: err } = await supabase.from('usuarios').insert(payload))
     }
     setSaving(false)
     if (err) {
-      setError(err.message.includes('duplicate') ? 'Já existe um usuário com esse CPF.' : err.message)
+      if (err.message.includes('uq_usuarios_email')) setError('Já existe um usuário com esse e-mail.')
+      else if (err.message.includes('duplicate')) setError('Já existe um usuário com esse CPF.')
+      else setError(err.message)
       return
     }
     setModalOpen(false)
@@ -130,7 +147,9 @@ export default function Usuario() {
   const filtered = useMemo(() => {
     return rows.filter((r) => {
       const matchesSearch = search
-        ? (r.nome || '').toLowerCase().includes(search.toLowerCase()) || (r.cpf || '').includes(search.replace(/\D/g, ''))
+        ? (r.nome || '').toLowerCase().includes(search.toLowerCase()) ||
+          (r.email || '').includes(search.trim().toLowerCase()) ||
+          (search.replace(/\D/g, '') !== '' && (r.cpf || '').includes(search.replace(/\D/g, '')))
         : true
       const matchesStatus = statusFilter === 'todos' ? true : r.status === statusFilter
       return matchesSearch && matchesStatus
@@ -144,7 +163,7 @@ export default function Usuario() {
       <div className="card">
         <div className="card-header">
           <div className="toolbar">
-            <input className="search-input" placeholder="Buscar por nome ou CPF..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <input className="search-input" placeholder="Buscar por nome, CPF ou e-mail..." value={search} onChange={(e) => setSearch(e.target.value)} />
             <select className="filter-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
               <option value="todos">Todos os status</option>
               <option value="ativo">Ativo</option>
@@ -162,13 +181,26 @@ export default function Usuario() {
           ) : (
             <table className="data-table">
               <thead>
-                <tr><th>Nome</th><th>CPF</th><th>Perfil</th><th>Status</th><th>Ações</th></tr>
+                <tr>
+                  <th>Nome</th><th>CPF</th><th>E-mail</th><th>Telefone</th><th>Nascimento</th>
+                  <th>Perfil</th><th>Status</th><th>Ações</th>
+                </tr>
               </thead>
               <tbody>
                 {filtered.map((row) => (
                   <tr key={row.id}>
-                    <td>{row.nome}</td>
+                    <td>
+                      <div className="usuario-nome">
+                        <div className="usuario-avatar">
+                          {row.foto ? <img src={fotoUsuarioUrl(row.foto)} alt="" /> : iniciais(row.nome)}
+                        </div>
+                        {row.nome}
+                      </div>
+                    </td>
                     <td>{formatarCpf(row.cpf)}</td>
+                    <td>{row.email || '-'}</td>
+                    <td>{row.telefone ? formatarTelefone(row.telefone) : '-'}</td>
+                    <td>{formatDate(row.data_nascimento)}</td>
                     <td>{row.perfis?.nome || '-'}</td>
                     <td><StatusBadge status={row.status} /></td>
                     <td>
@@ -213,6 +245,33 @@ export default function Usuario() {
                 placeholder="000.000.000-00"
                 value={form.cpf || ''}
                 onChange={(e) => setForm({ ...form, cpf: formatarCpf(e.target.value) })}
+              />
+            </div>
+            <div className="field">
+              <label>E-mail</label>
+              <input
+                type="email"
+                placeholder="nome@exemplo.com"
+                value={form.email || ''}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label>Telefone</label>
+              <input
+                inputMode="numeric"
+                maxLength={15}
+                placeholder="(00) 00000-0000"
+                value={form.telefone || ''}
+                onChange={(e) => setForm({ ...form, telefone: formatarTelefone(e.target.value) })}
+              />
+            </div>
+            <div className="field">
+              <label>Data de nascimento</label>
+              <input
+                type="date"
+                value={form.data_nascimento || ''}
+                onChange={(e) => setForm({ ...form, data_nascimento: e.target.value })}
               />
             </div>
             <div className="field">

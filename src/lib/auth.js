@@ -47,7 +47,13 @@ export async function carregarPerfil(perfilId) {
 export async function atualizarPerfilLogado() {
   const usuario = getUsuarioLogado()
   if (!usuario) return null
-  const atualizado = { ...usuario, ...(await carregarPerfil(usuario.perfil_id)) }
+  // Nome e foto podem ter sido alterados na tela "Meu perfil" (em outro aparelho)
+  const { data: dados } = await supabase
+    .from('usuarios')
+    .select('nome, foto')
+    .eq('id', usuario.id)
+    .maybeSingle()
+  const atualizado = { ...usuario, ...(dados || {}), ...(await carregarPerfil(usuario.perfil_id)) }
   salvarUsuarioLogado(atualizado)
   return atualizado
 }

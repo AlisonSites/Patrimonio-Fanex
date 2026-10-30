@@ -69,6 +69,18 @@ export function formatarCpf(valor) {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
 }
 
+export function formatarTelefone(valor) {
+  const digitos = String(valor || '').replace(/\D/g, '').slice(0, 11)
+  if (digitos.length <= 10) {
+    return digitos.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
+  }
+  return digitos.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
+}
+
+export function emailValido(valor) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(valor || '').trim())
+}
+
 // Valida os dígitos verificadores do CPF
 export function cpfValido(valor) {
   const cpf = String(valor || '').replace(/\D/g, '')

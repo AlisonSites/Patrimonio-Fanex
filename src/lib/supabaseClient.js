@@ -38,3 +38,12 @@ export const NOTAS_FISCAIS_BUCKET = 'notas-fiscais'
 
 // Nome do bucket de storage usado para a foto do patrimônio
 export const FOTOS_PATRIMONIO_BUCKET = 'fotos-patrimonio'
+
+// Nome do bucket de storage (público) usado para a foto do usuário
+export const FOTOS_USUARIOS_BUCKET = 'fotos-usuarios'
+
+// URL pública da foto do usuário (bucket público, não precisa de URL assinada)
+export function fotoUsuarioUrl(path) {
+  if (!path) return null
+  return supabase.storage.from(FOTOS_USUARIOS_BUCKET).getPublicUrl(path).data.publicUrl
+}

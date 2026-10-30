@@ -3,20 +3,19 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient.js'
 import PasswordInput from '../components/PasswordInput.jsx'
 import { carregarPerfil, salvarUsuarioLogado } from '../lib/auth.js'
+import { emailValido, formatarCpf } from '../lib/utils.js'
 import Logo from '../assets/logo-branco.png'
 import './Login.css'
 
-function formatarCpf(valor) {
-  const digitos = valor.replace(/\D/g, '').slice(0, 11)
-  return digitos
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d)/, '$1.$2')
-    .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
+// O campo aceita CPF ou e-mail: só aplica a máscara de CPF enquanto
+// o valor digitado tiver apenas números e pontuação de CPF.
+function ehEmail(valor) {
+  return /[^\d.\-\s]/.test(valor)
 }
 
 export default function Login() {
   const navigate = useNavigate()
-  const [cpf, setCpf] = useState('')
+  const [login, setLogin] = useState('')
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState('')
   const [carregando, setCarregando] = useState(false)
@@ -25,9 +24,11 @@ export default function Login() {
     evento.preventDefault()
     setErro('')
 
-    const cpfLimpo = cpf.replace(/\D/g, '')
-    if (cpfLimpo.length !== 11) {
-      setErro('Informe um CPF válido.')
+    const porEmail = ehEmail(login)
+    const email = login.trim().toLowerCase()
+    let cpfLimpo = login.replace(/\D/g, '')
+    if (porEmail ? !emailValido(email) : cpfLimpo.length !== 11) {
+      setErro('Informe um CPF ou e-mail válido.')
       return
     }
     if (!senha) {
@@ -36,6 +37,28 @@ export default function Login() {
     }
 
     setCarregando(true)
+
+    // Entrando pelo e-mail: descobre o CPF do usuário e valida a senha
+    // pela mesma função do login por CPF (autenticar_usuario).
+    if (porEmail) {
+      const { data: encontrado, error: errBusca } = await supabase
+        .from('usuarios')
+        .select('cpf')
+        .eq('email', email)
+        .maybeSingle()
+      if (errBusca) {
+        setCarregando(false)
+        setErro('Não foi possível validar o acesso agora. Tente novamente.')
+        return
+      }
+      if (!encontrado) {
+        setCarregando(false)
+        setErro('E-mail, senha ou status inválidos.')
+        return
+      }
+      cpfLimpo = encontrado.cpf
+    }
+
     const { data, error } = await supabase.rpc('autenticar_usuario', {
       p_cpf: cpfLimpo,
       p_senha: senha,
@@ -48,7 +71,7 @@ export default function Login() {
     }
 
     if (!data || data.length === 0) {
-      setErro('CPF, senha ou status inválidos.')
+      setErro(`${porEmail ? 'E-mail' : 'CPF'}, senha ou status inválidos.`)
       return
     }
 
@@ -73,7 +96,7 @@ export default function Login() {
           <span>Sistema de Gestão</span>
         </div>
         <p className="login-marca-texto">
-          Acesse com seu CPF e senha para gerenciar o patrimônio da instituição, os
+          Acesse com seu CPF ou e-mail e senha para gerenciar o patrimônio da instituição, os
           Chromebooks dos alunos e da escola, empréstimos e manutenções.
         </p>
       </div>
@@ -84,15 +107,14 @@ export default function Login() {
           <h2 className="login-form-titulo">Entrar</h2>
 
           <div className="field full">
-            <label htmlFor="cpf">CPF</label>
+            <label htmlFor="login">CPF ou e-mail</label>
             <input
-              id="cpf"
+              id="login"
               type="text"
-              inputMode="numeric"
-              placeholder="000.000.000-00"
-              value={cpf}
-              onChange={(e) => setCpf(formatarCpf(e.target.value))}
-              maxLength={14}
+              placeholder="000.000.000-00 ou nome@exemplo.com"
+              value={login}
+              onChange={(e) => setLogin(ehEmail(e.target.value) ? e.target.value : formatarCpf(e.target.value))}
+              autoCapitalize="none"
               autoComplete="username"
             />
           </div>

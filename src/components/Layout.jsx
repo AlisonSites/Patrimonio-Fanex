@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { atualizarPerfilLogado, getUsuarioLogado, logout } from '../lib/auth.js'
+import { fotoUsuarioUrl } from '../lib/supabaseClient.js'
 import { moduloPorPath, paginaPorPath } from '../lib/modulos.jsx'
 import { paginasPermitidas } from '../lib/permissoes.js'
 import logo from "../assets/logo-branco.png";
@@ -19,8 +20,10 @@ export default function Layout() {
 
   const modulo = moduloPorPath(location.pathname)
   const pagina = paginaPorPath(location.pathname)
-  const title = pagina?.titulo || (modulo ? modulo.label : 'Sistema de Gestão')
-  const subtitle = pagina?.subtitulo || (modulo ? '' : 'Patrimônio e Chromebooks')
+  const meuPerfil = location.pathname === '/meu-perfil'
+  const title = pagina?.titulo || (meuPerfil ? 'Meu perfil' : modulo ? modulo.label : 'Sistema de Gestão')
+  const subtitle = pagina?.subtitulo || (meuPerfil ? 'Seus dados, foto e senha' : modulo ? '' : 'Patrimônio e Chromebooks')
+  const fotoUrl = fotoUsuarioUrl(usuario?.foto)
 
   const navItems = modulo ? paginasPermitidas(usuario, modulo) : []
 
@@ -97,18 +100,22 @@ export default function Layout() {
           </div>
 
           <div className="topbar-user">
-            <div className="topbar-user-avatar">{iniciais}</div>
-            <div className="topbar-user-info">
-              <span className="topbar-user-nome">{usuario?.nome || 'Usuário'}</span>
-              <span className="topbar-user-perfil">{usuario?.perfil_nome || 'Sem perfil'}</span>
-            </div>
+            <Link to="/meu-perfil" className="topbar-user-link" title="Meu perfil">
+              <div className="topbar-user-avatar">
+                {fotoUrl ? <img src={fotoUrl} alt="" /> : iniciais}
+              </div>
+              <div className="topbar-user-info">
+                <span className="topbar-user-nome">{usuario?.nome || 'Usuário'}</span>
+                <span className="topbar-user-perfil">{usuario?.perfil_nome || 'Sem perfil'}</span>
+              </div>
+            </Link>
             <button className="btn btn-ghost btn-sm" onClick={handleLogout} title="Sair">
               <FaPowerOff /> <span className="btn-texto-sair">Sair</span>
             </button>
           </div>
         </header>
         <main className="content">
-          <Outlet context={{ usuario }} />
+          <Outlet context={{ usuario, setUsuario }} />
         </main>
       </div>
     </div>
