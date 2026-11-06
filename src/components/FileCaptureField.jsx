@@ -7,6 +7,8 @@ import { FaCamera, FaUpload } from 'react-icons/fa'
  *
  * Props:
  * - onChange(file): chamado quando um novo arquivo é selecionado
+ *   (com multiple, recebe um array com os arquivos escolhidos)
+ * - multiple: permite escolher vários arquivos de uma vez no upload
  * - accept: tipos aceitos no input de upload (ex: 'image/*' ou '.pdf,.png,.jpg')
  * - cameraAccept: tipos aceitos no input da câmera (padrão 'image/*')
  * - allowCamera: mostra ou não o botão "Tirar Foto" (padrão true)
@@ -14,6 +16,7 @@ import { FaCamera, FaUpload } from 'react-icons/fa'
  */
 export default function FileCaptureField({
   onChange,
+  multiple = false,
   accept = 'image/*',
   cameraAccept = 'image/*',
   allowCamera = true,
@@ -24,8 +27,8 @@ export default function FileCaptureField({
   const uploadInputRef = useRef(null)
 
   function handleChange(e) {
-    const file = e.target.files?.[0] || null
-    onChange(file)
+    const files = Array.from(e.target.files || [])
+    onChange(multiple ? files : files[0] || null)
     // Permite selecionar o mesmo arquivo novamente depois, se necessário.
     e.target.value = ''
   }
@@ -63,6 +66,7 @@ export default function FileCaptureField({
         ref={uploadInputRef}
         type="file"
         accept={accept}
+        multiple={multiple}
         onChange={handleChange}
         style={{ display: 'none' }}
       />

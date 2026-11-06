@@ -5,7 +5,7 @@ import { formatCurrency, formatDate, patrimonioCodigo } from '../lib/utils.js'
 
 export default function FichaPatrimonio({
   patrimonio,
-  fotoUrl,
+  fotoUrls = [],
   notaFiscalUrl,
   conservacoes,
   movimentacoes,
@@ -16,6 +16,9 @@ export default function FichaPatrimonio({
   onAbrirNotaFiscal,
 }) {
   if (!patrimonio) return null
+
+  // A primeira foto é a principal; as demais aparecem na galeria abaixo
+  const fotoUrl = fotoUrls[0] || null
 
   function handlePrint() {
     window.print()
@@ -79,6 +82,20 @@ export default function FichaPatrimonio({
             <StatusBadge status={patrimonio.status} />
           </div>
         </div>
+
+        {fotoUrls.length > 1 && (
+          <div className="ficha-galeria">
+            {fotoUrls.map((url, i) => (
+              <img
+                key={url}
+                src={url}
+                alt={`Foto ${i + 1}`}
+                onClick={() => window.open(url, '_blank')}
+                title="Clique para ampliar"
+              />
+            ))}
+          </div>
+        )}
 
         <div className="ficha-section">
           <div className="ficha-section-title"><FaCoins /> Dados de Aquisição</div>

@@ -7,10 +7,18 @@ import StatusBadge from '../components/StatusBadge.jsx'
 import FichaPatrimonio from '../components/FichaPatrimonio.jsx'
 import FileCaptureField from '../components/FileCaptureField.jsx'
 import SearchableSelect from '../components/SearchableSelect.jsx'
-import { FaEdit, FaTrash, FaPaperclip, FaInbox, FaIdCard, FaCamera, FaImage } from 'react-icons/fa'
+import { FaEdit, FaTrash, FaPaperclip, FaInbox, FaIdCard, FaCamera, FaImage, FaStar, FaTimes } from 'react-icons/fa'
 import { usePodeEditar } from '../lib/permissoes.js'
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
+const MAX_FOTOS = 10
+
+// Fotos do patrimônio em ordem (a primeira é a principal). Registros antigos
+// só têm a coluna "foto"; nesse caso ela vira uma lista de uma foto.
+function fotosDoPatrimonio(row) {
+  if (row?.fotos?.length) return row.fotos
+  return row?.foto ? [row.foto] : []
+}
 
 const EMPTY_FORM = {
   modelo: '',
@@ -18,7 +26,6 @@ const EMPTY_FORM = {
   numero_serie: '',
   nota_fiscal_numero: '',
   nota_fiscal_arquivo: '',
-  foto: '',
   data_aquisicao: todayISO(),
   valor_original: '',
   valor_compra: '',
@@ -54,8 +61,8 @@ export default function Patrimonio() {
   const [editing, setEditing] = useState(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [novoArquivo, setNovoArquivo] = useState(null)
-  const [novaFoto, setNovaFoto] = useState(null)
-  const [novaFotoPreview, setNovaFotoPreview] = useState('')
+  // Fotos no formulário: { key, path } para as já salvas e { key, file, preview } para as novas
+  const [fotosForm, setFotosForm] = useState([])
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(null)
 
@@ -64,7 +71,7 @@ export default function Patrimonio() {
 
   // Ficha (modal com todas as informações do patrimônio)
   const [ficha, setFicha] = useState(null)
-  const [fichaFotoUrl, setFichaFotoUrl] = useState(null)
+  const [fichaFotoUrls, setFichaFotoUrls] = useState([])
   const [fichaNotaUrl, setFichaNotaUrl] = useState(null)
   const [fichaConservacoes, setFichaConservacoes] = useState([])
   const [fichaMovimentacoes, setFichaMovimentacoes] = useState([])
@@ -103,8 +110,7 @@ export default function Patrimonio() {
   function openNew() {
     setForm(EMPTY_FORM)
     setNovoArquivo(null)
-    setNovaFoto(null)
-    setNovaFotoPreview('')
+    limparFotosForm()
     setEditing(null)
     setModalOpen(true)
   }
@@ -116,7 +122,6 @@ export default function Patrimonio() {
       numero_serie: row.numero_serie || '',
       nota_fiscal_numero: row.nota_fiscal_numero || '',
       nota_fiscal_arquivo: row.nota_fiscal_arquivo || '',
-      foto: row.foto || '',
       data_aquisicao: row.data_aquisicao || '',
       valor_original: row.valor_original ?? '',
       valor_compra: row.valor_compra ?? '',
@@ -130,17 +135,42 @@ export default function Patrimonio() {
       status: row.status || 'ativo',
     })
     setNovoArquivo(null)
-    setNovaFoto(null)
-    setNovaFotoPreview('')
+    limparFotosForm()
+    const paths = fotosDoPatrimonio(row)
+    setFotosForm(paths.map((path) => ({ key: path, path })))
+    carregarThumbs(paths)
     setEditing(row)
     setModalOpen(true)
     setFicha(null)
   }
 
-  function handleFotoChange(file) {
-    setNovaFoto(file || null)
-    if (novaFotoPreview) URL.revokeObjectURL(novaFotoPreview)
-    setNovaFotoPreview(file ? URL.createObjectURL(file) : '')
+  function limparFotosForm() {
+    fotosForm.forEach((f) => f.preview && URL.revokeObjectURL(f.preview))
+    setFotosForm([])
+  }
+
+  function handleFotosChange(files) {
+    const imagens = files.filter((f) => f.type.startsWith('image/'))
+    const vagas = MAX_FOTOS - fotosForm.length
+    if (imagens.length > vagas) setError(`Cada patrimônio pode ter no máximo ${MAX_FOTOS} fotos.`)
+    const novas = imagens.slice(0, Math.max(0, vagas)).map((file) => ({
+      key: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      file,
+      preview: URL.createObjectURL(file),
+    }))
+    setFotosForm((prev) => [...prev, ...novas])
+  }
+
+  function removerFotoForm(key) {
+    setFotosForm((prev) => {
+      const foto = prev.find((f) => f.key === key)
+      if (foto?.preview) URL.revokeObjectURL(foto.preview)
+      return prev.filter((f) => f.key !== key)
+    })
+  }
+
+  function tornarPrincipal(key) {
+    setFotosForm((prev) => [prev.find((f) => f.key === key), ...prev.filter((f) => f.key !== key)])
   }
 
   function handleNotaFiscalChange(file) {
@@ -159,7 +189,6 @@ export default function Patrimonio() {
     setError('')
 
     let notaFiscalPath = form.nota_fiscal_arquivo
-    let fotoPath = form.foto
 
     try {
       if (novoArquivo) {
@@ -172,14 +201,17 @@ export default function Patrimonio() {
         notaFiscalPath = path
       }
 
-      if (novaFoto) {
-        const ext = novaFoto.name.split('.').pop()
+      // Envia as fotos novas e monta a lista final, mantendo a ordem da tela
+      const fotos = []
+      for (const foto of fotosForm) {
+        if (foto.path) { fotos.push(foto.path); continue }
+        const ext = foto.file.name.split('.').pop()
         const path = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`
         const { error: uploadErr } = await supabase.storage
           .from(FOTOS_PATRIMONIO_BUCKET)
-          .upload(path, novaFoto, { upsert: false })
+          .upload(path, foto.file, { upsert: false })
         if (uploadErr) throw uploadErr
-        fotoPath = path
+        fotos.push(path)
       }
 
       const payload = {
@@ -188,7 +220,8 @@ export default function Patrimonio() {
         numero_serie: form.numero_serie,
         nota_fiscal_numero: form.nota_fiscal_numero,
         nota_fiscal_arquivo: notaFiscalPath || null,
-        foto: fotoPath || null,
+        foto: fotos[0] || null,
+        fotos,
         data_aquisicao: form.data_aquisicao || null,
         valor_original: form.valor_original === '' ? null : Number(form.valor_original),
         valor_compra: form.valor_compra === '' ? null : Number(form.valor_compra),
@@ -210,6 +243,11 @@ export default function Patrimonio() {
       }
       if (err) throw err
 
+      // Apaga do storage as fotos que foram removidas no formulário
+      const removidas = editing ? fotosDoPatrimonio(editing).filter((p) => !fotos.includes(p)) : []
+      if (removidas.length) await supabase.storage.from(FOTOS_PATRIMONIO_BUCKET).remove(removidas)
+
+      limparFotosForm()
       setModalOpen(false)
       load()
     } catch (err) {
@@ -232,6 +270,24 @@ export default function Patrimonio() {
     return data?.signedUrl || null
   }
 
+  // Gera as URLs assinadas das fotos que ainda não temos em cache,
+  // para exibir as miniaturas na tabela e no formulário.
+  async function carregarThumbs(paths) {
+    const pathsFaltando = paths.filter((path) => path && !thumbUrls[path])
+    if (pathsFaltando.length === 0) return
+
+    const entradas = await Promise.all(
+      pathsFaltando.map(async (path) => [path, await getArquivoUrl(FOTOS_PATRIMONIO_BUCKET, path, 3600)])
+    )
+    setThumbUrls((prev) => {
+      const novo = { ...prev }
+      for (const [path, url] of entradas) {
+        if (url) novo[path] = url
+      }
+      return novo
+    })
+  }
+
   async function handleAbrirArquivo(path) {
     const url = await getArquivoUrl(NOTAS_FISCAIS_BUCKET, path)
     if (url) window.open(url, '_blank')
@@ -246,15 +302,17 @@ export default function Patrimonio() {
 
   async function openFicha(row) {
     setFicha(row)
-    setFichaFotoUrl(null)
+    setFichaFotoUrls([])
     setFichaNotaUrl(null)
     setFichaConservacoes([])
     setFichaMovimentacoes([])
     setFichaQuebrados([])
     setFichaHistoricoLoading(true)
 
-    if (row.foto) {
-      getArquivoUrl(FOTOS_PATRIMONIO_BUCKET, row.foto).then(setFichaFotoUrl)
+    const fotos = fotosDoPatrimonio(row)
+    if (fotos.length) {
+      Promise.all(fotos.map((path) => getArquivoUrl(FOTOS_PATRIMONIO_BUCKET, path, 3600)))
+        .then((urls) => setFichaFotoUrls(urls.filter(Boolean)))
     }
     if (row.nota_fiscal_arquivo) {
       getArquivoUrl(NOTAS_FISCAIS_BUCKET, row.nota_fiscal_arquivo).then(setFichaNotaUrl)
@@ -311,33 +369,9 @@ export default function Patrimonio() {
     [filtered, currentPage, pageSize]
   )
 
-  // Gera as URLs assinadas das fotos da página atual que ainda não temos
-  // em cache, para exibir as miniaturas na tabela.
+  // Miniaturas (foto principal) da página atual da tabela
   useEffect(() => {
-    const pathsFaltando = paginated
-      .map((r) => r.foto)
-      .filter((path) => path && !thumbUrls[path])
-
-    if (pathsFaltando.length === 0) return
-
-    let cancelado = false
-    Promise.all(
-      pathsFaltando.map(async (path) => {
-        const url = await getArquivoUrl(FOTOS_PATRIMONIO_BUCKET, path, 3600)
-        return [path, url]
-      })
-    ).then((entradas) => {
-      if (cancelado) return
-      setThumbUrls((prev) => {
-        const novo = { ...prev }
-        for (const [path, url] of entradas) {
-          if (url) novo[path] = url
-        }
-        return novo
-      })
-    })
-
-    return () => { cancelado = true }
+    carregarThumbs(paginated.map((r) => r.foto))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paginated])
 
@@ -395,6 +429,7 @@ export default function Patrimonio() {
                   <tr key={row.id}>
                     <td>{patrimonioCodigo(row.id)}</td>
                     <td>
+                      <div className="foto-tabela-wrap">
                       {row.foto ? (
                         thumbUrls[row.foto] ? (
                           <img
@@ -411,6 +446,12 @@ export default function Patrimonio() {
                       ) : (
                         <div className="foto-tabela-patrimonio foto-tabela-patrimonio-placeholder"><FaImage /></div>
                       )}
+                      {fotosDoPatrimonio(row).length > 1 && (
+                        <span className="foto-tabela-contador" title={`${fotosDoPatrimonio(row).length} fotos`}>
+                          +{fotosDoPatrimonio(row).length - 1}
+                        </span>
+                      )}
+                      </div>
                     </td>
                     <td>{row.nome}</td>
                     <td>{row.modelo}</td>
@@ -484,24 +525,41 @@ export default function Patrimonio() {
             </div>
 
             <div className="field full">
-              <label>Foto do Produto (opcional)</label>
-              <div className="photo-upload">
-                <div className="photo-upload-preview">
-                  {novaFotoPreview ? (
-                    <img src={novaFotoPreview} alt="Pré-visualização" />
-                  ) : form.foto && !novaFoto ? (
-                    <div className="photo-upload-placeholder"><FaCamera size={20} /><span>Foto já anexada</span></div>
-                  ) : (
+              <label>Fotos do Produto (opcional, até {MAX_FOTOS})</label>
+              <div className="fotos-form">
+                {fotosForm.length === 0 && (
+                  <div className="photo-upload-preview">
                     <div className="photo-upload-placeholder"><FaCamera size={20} /><span>Sem foto</span></div>
-                  )}
-                </div>
+                  </div>
+                )}
+                {fotosForm.map((foto, i) => {
+                  const src = foto.preview || thumbUrls[foto.path]
+                  return (
+                    <div key={foto.key} className={`photo-upload-preview fotos-form-item ${i === 0 ? 'principal' : ''}`}>
+                      {src ? <img src={src} alt="" /> : <div className="foto-tabela-patrimonio-loading fotos-form-loading" />}
+                      {i === 0 ? (
+                        <span className="fotos-form-tag">Principal</span>
+                      ) : (
+                        <button type="button" className="fotos-form-btn fotos-form-estrela" title="Tornar foto principal" onClick={() => tornarPrincipal(foto.key)}>
+                          <FaStar />
+                        </button>
+                      )}
+                      <button type="button" className="fotos-form-btn fotos-form-remover" title="Remover foto" onClick={() => removerFotoForm(foto.key)}>
+                        <FaTimes />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+              {fotosForm.length < MAX_FOTOS && (
                 <FileCaptureField
                   accept="image/*"
+                  multiple
                   cameraLabel="Tirar Foto"
                   uploadLabel="Enviar da Galeria"
-                  onChange={handleFotoChange}
+                  onChange={handleFotosChange}
                 />
-              </div>
+              )}
             </div>
 
             <div className="field">
@@ -629,7 +687,7 @@ export default function Patrimonio() {
       {ficha && (
         <FichaPatrimonio
           patrimonio={ficha}
-          fotoUrl={fichaFotoUrl}
+          fotoUrls={fichaFotoUrls}
           notaFiscalUrl={fichaNotaUrl}
           conservacoes={fichaConservacoes}
           movimentacoes={fichaMovimentacoes}
