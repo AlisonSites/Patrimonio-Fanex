@@ -66,6 +66,7 @@ export default function Movimentacao() {
   }, [setores, form.unidade_destino_id])
 
   function openNew() {
+    setError('')
     const primeiro = patrimonios[0]
     setForm({
       ...EMPTY_FORM,
@@ -78,6 +79,7 @@ export default function Movimentacao() {
   }
 
   function openEdit(row) {
+    setError('')
     setForm({
       patrimonio_id: row.patrimonio_id,
       data: row.data || todayISO(),
@@ -219,6 +221,7 @@ export default function Movimentacao() {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? 'Editar Movimentação' : 'Nova Movimentação'}
           onClose={() => setModalOpen(false)}
           footer={

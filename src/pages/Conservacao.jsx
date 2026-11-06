@@ -51,12 +51,14 @@ export default function Conservacao() {
   useEffect(() => { load() }, [])
 
   function openNew() {
+    setError('')
     setForm({ ...EMPTY_FORM, patrimonio_id: patrimonios[0]?.id || '' })
     setEditing(null)
     setModalOpen(true)
   }
 
   function openEdit(row) {
+    setError('')
     setForm({
       patrimonio_id: row.patrimonio_id,
       data: row.data || todayISO(),
@@ -167,6 +169,7 @@ export default function Conservacao() {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? 'Editar Registro de Conservação' : 'Novo Registro de Conservação'}
           onClose={() => setModalOpen(false)}
           footer={

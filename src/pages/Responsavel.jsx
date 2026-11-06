@@ -38,12 +38,14 @@ export default function Responsavel() {
   useEffect(() => { load() }, [])
 
   function openNew() {
+    setError('')
     setForm({ nome: '', setor_id: setores[0]?.id || '', status: 'ativo' })
     setEditing(null)
     setModalOpen(true)
   }
 
   function openEdit(row) {
+    setError('')
     setForm({ nome: row.nome, setor_id: row.setor_id, status: row.status })
     setEditing(row)
     setModalOpen(true)
@@ -147,6 +149,7 @@ export default function Responsavel() {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? 'Editar Responsável' : 'Novo Responsável'}
           onClose={() => setModalOpen(false)}
           footer={

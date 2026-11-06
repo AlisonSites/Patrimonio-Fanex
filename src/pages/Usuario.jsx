@@ -55,12 +55,14 @@ export default function Usuario() {
   useEffect(() => { load(); loadPerfis() }, [])
 
   function openNew() {
+    setError('')
     setForm({ nome: '', cpf: '', email: '', telefone: '', data_nascimento: '', senha: '', status: 'ativo', perfil_id: '' })
     setEditing(null)
     setModalOpen(true)
   }
 
   function openEdit(row) {
+    setError('')
     setForm({
       nome: row.nome,
       cpf: formatarCpf(row.cpf),
@@ -220,6 +222,7 @@ export default function Usuario() {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? 'Editar Usuário' : 'Novo Usuário'}
           onClose={() => setModalOpen(false)}
           footer={

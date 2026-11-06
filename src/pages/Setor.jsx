@@ -38,12 +38,14 @@ export default function Setor() {
   useEffect(() => { load() }, [])
 
   function openNew() {
+    setError('')
     setForm({ nome: '', unidade_id: unidades[0]?.id || '', status: 'ativo' })
     setEditing(null)
     setModalOpen(true)
   }
 
   function openEdit(row) {
+    setError('')
     setForm({ nome: row.nome, unidade_id: row.unidade_id, status: row.status })
     setEditing(row)
     setModalOpen(true)
@@ -141,6 +143,7 @@ export default function Setor() {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? 'Editar Setor' : 'Novo Setor'}
           onClose={() => setModalOpen(false)}
           footer={

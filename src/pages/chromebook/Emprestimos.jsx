@@ -87,12 +87,14 @@ export default function Emprestimos() {
   }, [])
 
   function openNew() {
+    setError('')
     setForm(EMPTY_FORM)
     setEditing(null)
     setModalOpen(true)
   }
 
   function openEdit(row) {
+    setError('')
     setForm({
       chromebook_id: row.chromebook_id,
       aluno_id: row.aluno_id,
@@ -314,6 +316,7 @@ export default function Emprestimos() {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? `Editar Empréstimo — ${emprestimoCodigo(editing.id)}` : 'Novo Empréstimo'}
           onClose={() => setModalOpen(false)}
           footer={
@@ -374,6 +377,7 @@ export default function Emprestimos() {
 
       {devolvendo && (
         <Modal
+          error={error}
           title="Registrar Devolução"
           onClose={() => setDevolvendo(null)}
           maxWidth={520}

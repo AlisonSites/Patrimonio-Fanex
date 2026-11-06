@@ -36,12 +36,14 @@ export default function Perfil() {
   useEffect(() => { load() }, [])
 
   function openNew() {
+    setError('')
     setForm({ nome: '', descricao: '', is_admin: false, permissoes: {}, status: 'ativo' })
     setEditing(null)
     setModalOpen(true)
   }
 
   function openEdit(row) {
+    setError('')
     setForm({ ...row, permissoes: row.permissoes || {} })
     setEditing(row)
     setModalOpen(true)
@@ -162,6 +164,7 @@ export default function Perfil() {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? 'Editar Perfil' : 'Novo Perfil'}
           onClose={() => setModalOpen(false)}
           maxWidth={820}

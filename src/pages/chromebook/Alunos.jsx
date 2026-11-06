@@ -54,12 +54,14 @@ export default function Alunos() {
   useEffect(() => { load() }, [])
 
   function openNew() {
+    setError('')
     setForm(EMPTY_FORM)
     setEditing(null)
     setModalOpen(true)
   }
 
   function openEdit(row) {
+    setError('')
     setForm({
       nome: row.nome,
       cpf: formatarCpf(row.cpf),
@@ -213,6 +215,7 @@ export default function Alunos() {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? 'Editar Aluno' : 'Novo Aluno'}
           onClose={() => setModalOpen(false)}
           footer={

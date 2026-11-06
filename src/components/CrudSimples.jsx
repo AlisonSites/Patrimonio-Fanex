@@ -37,6 +37,7 @@ export default function CrudSimples({ table, entityLabel, codePrefix, fields }) 
   useEffect(() => { load() }, [])
 
   function openNew() {
+    setError('')
     const initial = { status: 'ativo' }
     fields.forEach((f) => { initial[f.key] = '' })
     setForm(initial)
@@ -45,6 +46,7 @@ export default function CrudSimples({ table, entityLabel, codePrefix, fields }) 
   }
 
   function openEdit(row) {
+    setError('')
     setForm({ ...row })
     setEditing(row)
     setModalOpen(true)
@@ -152,6 +154,7 @@ export default function CrudSimples({ table, entityLabel, codePrefix, fields }) 
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? `Editar ${entityLabel}` : `Novo ${entityLabel}`}
           onClose={() => setModalOpen(false)}
           footer={

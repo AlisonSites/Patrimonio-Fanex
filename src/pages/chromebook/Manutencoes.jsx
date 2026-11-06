@@ -81,12 +81,14 @@ export default function Manutencoes() {
   )
 
   function openNew() {
+    setError('')
     setForm(EMPTY_FORM)
     setEditing(null)
     setModalOpen(true)
   }
 
   function openEdit(row) {
+    setError('')
     setForm({
       chromebook_id: row.chromebook_id,
       aluno_id: row.aluno_id || '',
@@ -314,6 +316,7 @@ export default function Manutencoes() {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? `Editar Manutenção — ${manutencaoCodigo(editing.id)}` : 'Registrar Manutenção'}
           onClose={() => setModalOpen(false)}
           maxWidth={720}

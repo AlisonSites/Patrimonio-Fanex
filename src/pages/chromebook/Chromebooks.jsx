@@ -68,12 +68,14 @@ export default function Chromebooks({ propriedade }) {
   )
 
   function openNew() {
+    setError('')
     setForm(EMPTY_FORM)
     setEditing(null)
     setModalOpen(true)
   }
 
   function openEdit(row) {
+    setError('')
     setForm({
       numero_serie: row.numero_serie,
       marca: row.marca || '',
@@ -241,6 +243,7 @@ export default function Chromebooks({ propriedade }) {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? 'Editar Chromebook' : doAluno ? 'Novo Chromebook do Aluno' : 'Novo Chromebook da Escola'}
           onClose={() => setModalOpen(false)}
           footer={

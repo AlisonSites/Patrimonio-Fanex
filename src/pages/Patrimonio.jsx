@@ -108,6 +108,7 @@ export default function Patrimonio() {
   useEffect(() => { load(); loadAuxData() }, [])
 
   function openNew() {
+    setError('')
     setForm(EMPTY_FORM)
     setNovoArquivo(null)
     limparFotosForm()
@@ -116,6 +117,7 @@ export default function Patrimonio() {
   }
 
   function openEdit(row) {
+    setError('')
     setForm({
       modelo: row.modelo || '',
       nome: row.nome || '',
@@ -504,6 +506,7 @@ export default function Patrimonio() {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? 'Editar Patrimônio' : 'Novo Patrimônio'}
           onClose={() => setModalOpen(false)}
           maxWidth={760}

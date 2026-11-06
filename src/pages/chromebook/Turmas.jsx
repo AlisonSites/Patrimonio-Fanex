@@ -43,12 +43,14 @@ export default function Turmas() {
   useEffect(() => { load() }, [])
 
   function openNew() {
+    setError('')
     setForm({ ...EMPTY_FORM, unidade_id: unidades.length === 1 ? unidades[0].id : '' })
     setEditing(null)
     setModalOpen(true)
   }
 
   function openEdit(row) {
+    setError('')
     setForm({
       nome: row.nome,
       unidade_id: row.unidade_id || '',
@@ -170,6 +172,7 @@ export default function Turmas() {
 
       {modalOpen && (
         <Modal
+          error={error}
           title={editing ? 'Editar Turma' : 'Nova Turma'}
           onClose={() => setModalOpen(false)}
           footer={
